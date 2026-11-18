@@ -16,6 +16,14 @@
 
 CLI リポジトリには `circuitgame2-lsp` を別バイナリとして置く。標準入出力の JSON-RPC、LSP メッセージと core 型の対応、ファイル URI、セッションと要求の取り消しを担当する。LSP の位置エンコーディングはクライアントと交渉し、指定がない場合は UTF-16 を使う。文字・行位置と UTF-8 byte offset の変換は core の純粋関数を呼び出す。Web エディタは同じ問い合わせを WASM 経由で使う。LSP/JSON-RPC の型は core の公開 API に含めない。
 
+### 推論結果のインレイヒント
+
+VS Code では rust-analyzer の型表示と同じように、ソースの横に推論結果をインレイヒントとして描画する。モジュール名の直後には、[静的解析](static-analysis.md#自動解析)で上界が得られた場合に「定常化 ≤ 2 tick」のように表示する。周期解析を追加した場合は、確認できた結論に応じて「2 tick ごとに状態が戻る」または「基本周期 2 tick」と表示する。回路内の局所配線の幅や、関数型言語のローカル名の型も同じ経路で表示できる。型と実行特性の表示は個別に切り替えられる。
+
+短いラベルに加えて、ヒントの説明に固定入力の前提、対象の内部状態、ゲート深さなどの根拠を記す。解析が未完了、対象外、または編集中の回路を確定できない場合はインライン表示を省き、要求されたときにホバーや解析コマンドでその理由を説明する。
+
+core は表示位置、推論結果の種別とデータ、解析スナップショットを返す。LSP は要求範囲内の結果を `textDocument/inlayHint` に変換し、注釈を挿入する編集は返さない。定常化のヒントには型・引数名の種別を付けず、推論した型のヒントには型の種別を使う。本文や参照先の版が変わった場合は古い結果を破棄する。VS Code は標準のインレイヒントを使い、Neovim はクライアントが対応し利用者が有効化した場合に同じ結果を表示する。Web も core の同じデータを使う。
+
 ### Neovim と VS Code の拡張
 
 両エディタで `.cg2` を言語 ID `circuitgame2` として登録する。拡張は括弧の対応、コメント操作、基本的な色付けを提供し、同じ `circuitgame2-lsp` に接続する。診断、補完、ホバー、定義への移動は LSP の標準機能で提供する。基本の色付けは起動前から使え、サーバーがセマンティックトークンを提供したときは、入力ポートや回路名などを解析結果に基づいて色分けする。回路の構文解析や型情報の計算は core が担当する。
@@ -77,6 +85,7 @@ Codex で設計文書を推敲する場合は、[yomiyasu v3.2.0](https://github
 - [Language Server Protocol の位置エンコーディング](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#position)
 - [Neovim の LSP 設定](https://neovim.io/doc/user/lsp/)、[VS Code の LSP クライアント](https://code.visualstudio.com/api/language-extensions/language-server-extension-guide)、[VS Code 拡張の配布](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#platform-specific-extensions)
 - [共通の言語サーバーを VS Code 拡張に同梱する rust-analyzer の例](https://rust-analyzer.github.io/book/installation.html)
+- [VS Code の Rust インレイヒント](https://code.visualstudio.com/docs/languages/rust#_inlay-hints) と [LSP 3.17 のインレイヒント](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_inlayHint)
 - [Rust Reference](https://doc.rust-lang.org/reference/) の言語仕様とツールの分離、[WebAssembly Core Specification](https://webassembly.github.io/spec/core/) の構造・検証・実行の区分を参照した。
 - [W3C の Specification Guidelines](https://www.w3.org/TR/qaframe-spec/) の規則と参考記述の区分、[WebAssembly の検証アルゴリズム付録](https://webassembly.github.io/spec/core/appendix/algorithm.html) の仕様と検証方法の配置を参照した。
 - [Diátaxis のリファレンス](https://diataxis.fr/reference/)、[NASA の要求記述ガイド](https://www.nasa.gov/reference/appendix-c-how-to-write-a-good-requirement/)、[arc42 の設計文書の構成](https://arc42.org/overview/)を参照した。
