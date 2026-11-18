@@ -56,20 +56,20 @@ CLI と言語サーバーは枠の間で中断要求を確認する。Web は枠
 
 Verus では、実行枠が指定したステップ数を超えないこと、一時停止から正確に再開できること、実行枠の分け方が値、診断、生成された束縛に影響しないことを示す。例えば中断なしで `a` ステップと `b` ステップに分けた実行は、`a+b` ステップをまとめて実行したときと同じ状態または最終結果を返す。この性質と、実装の遷移が有限の参照評価を進めるという証明から、正の実行枠が継続して与えられる実行はいずれ完了する。
 
-形式仕様では、受理された式と環境から得られる初期評価状態を $s_0$、評価機械の1ステップを $\operatorname{next}$ とする。値またはエラーに到達した最終状態では $\operatorname{next}(s) := s$ と定める。$R_n(s) := \operatorname{next}^{n}(s)$ とすると、示すべき性質は次のとおりである。
+形式仕様では、受理された式と環境から得られる初期評価状態を $`s_0`$、評価機械の1ステップを $`\mathrm{next}`$ とする。値またはエラーに到達した最終状態では $`\mathrm{next}(s) := s`$ と定める。$`R_n(s) := \mathrm{next}^{n}(s)`$ とすると、示すべき性質は次のとおりである。
 
-$$
+```math
 \begin{aligned}
-&\forall s_0 \in \operatorname{AcceptedInit},\quad
-  \exists n \in \mathbb{N},\ \operatorname{Final}(R_n(s_0)),\\
-&\forall s \in \operatorname{Reachable},\ \forall a,b \in \mathbb{N},\quad
+&\forall s_0 \in \mathrm{AcceptedInit},\quad
+  \exists n \in \mathbb{N},\ \mathrm{Final}(R_n(s_0)),\\
+&\forall s \in \mathrm{Reachable},\ \forall a,b \in \mathbb{N},\quad
   R_b(R_a(s)) = R_{a+b}(s).
 \end{aligned}
-$$
+```
 
 `run_slice` の返り値は、この状態が最終状態か途中状態かに対応する。中断した実行は、評価の返り値を公開する前にホストが破棄する。内部バッファの最適化は、対応する参照状態と同じ値、診断、生成された束縛を得ることを条件とする。
 
-実行枠の合成は $b$ に関する帰納法で従う。$b=0$ では $R_0$ が恒等関数であり、$b+1$ では帰納法の仮定の両辺に $\operatorname{next}$ を適用する。実装の証明では、実行枠の処理がこの反復に対応することを示す。
+実行枠の合成は $`b`$ に関する帰納法で従う。$`b=0`$ では $`R_0`$ が恒等関数であり、$`b+1`$ では帰納法の仮定の両辺に $`\mathrm{next}`$ を適用する。実装の証明では、実行枠の処理がこの反復に対応することを示す。
 
 ## 展開結果の保証とテスト
 
