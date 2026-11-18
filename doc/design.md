@@ -11,9 +11,9 @@ circuitgame2 は、論理回路の接続と離散時間での動作を記述し�
 | [circuitgame2](https://github.com/neknaj/circuitgame2) | `doc/` の仕様、共通サンプル、期待する出力・trace、リリースの組み合わせを検査する CI |
 | [circuitgame2-core](https://github.com/neknaj/circuitgame2-core) | Rust の構文解析、型・結線検査、ネットリスト、VM、テスト実行、エディタ向け言語サービス、後から加える Lisp、Verus の仕様と証明 |
 | [circuitgame2-web](https://github.com/neknaj/circuitgame2-web) | WASM バインディング、エディタ、可視化、ブラウザの入出力と永続化 |
-| [circuitgame2-cli](https://github.com/neknaj/circuitgame2-cli) | Rust のコマンド、診断表示、ファイル入出力、ネイティブと WASI の実行環境、LSP の通信・プロトコル変換 |
+| [circuitgame2-cli](https://github.com/neknaj/circuitgame2-cli) | Rust のコマンド、診断表示、ファイル入出力、ネイティブと WASI の実行環境、LSP の通信・プロトコル変換、Neovim と VS Code の拡張 |
 
-Web と CLI は core に直接依存する。メインの統合 CI は各リポジトリのコミットを指定してチェックアウトし、共通サンプルを検査する。core 内のライブラリや証明は必要に応じて Cargo workspace 内のクレートに分ける。作成済みのメイン、core、web に CLI を加えた4リポジトリで構成する。VM、Lisp、標準回路、ドキュメント、LSP 専用の追加リポジトリは不要である。
+Web と CLI は core に直接依存する。メインの統合 CI は各リポジトリのコミットを指定してチェックアウトし、共通サンプルを検査する。core 内のライブラリや証明は必要に応じて Cargo workspace 内のクレートに分ける。メイン、core、web、CLI の4リポジトリで構成する。Neovim と VS Code の拡張は CLI リポジトリ内に置き、パッケージはエディタごとに配布する。
 
 配布時は Cargo の git 依存を使用する。core を参照する下流は同一 URL と同一の40桁コミット ID を `rev` に使い、対応する `version` も記す。Cargo は取得先のコミットを `rev` で選び、そのコミットのパッケージが `version` の要件を満たすか検査する。各配布側の `Cargo.lock` をコミットし、CI は `--locked`、`cargo tree -d`、lockfile の core の取得元とコミット ID、およびメインで指定したコミットの一致を確認する。
 
@@ -150,6 +150,21 @@ tick の開始時に入力フレームを適用する。すべてのゲートと
 
 CLI リポジトリには `circuitgame2-lsp` を別バイナリとして置く。標準入出力の JSON-RPC、LSP メッセージと core 型の対応、ファイル URI、セッションと要求の取り消しを担当する。LSP の位置エンコーディングはクライアントと交渉し、指定がない場合は UTF-16 を使う。文字・行位置と UTF-8 byte offset の変換は core の純粋関数を呼び出す。Web エディタは同じ問い合わせを WASM 経由で使う。LSP/JSON-RPC の型は core の公開 API に含めない。
 
+### Neovim と VS Code の拡張
+
+両エディタで `.cg2` を言語 ID `circuitgame2` として登録する。拡張は括弧の対応、コメント操作、基本的な色付けを提供し、同じ `circuitgame2-lsp` に接続する。診断、補完、ホバー、定義への移動は LSP の標準機能で提供する。基本の色付けは起動前から使え、サーバーがセマンティックトークンを提供したときは、入力ポートや回路名などを解析結果に基づいて色分けする。回路の構文解析や型情報の計算は core が担当する。
+
+| エディタ | CLI リポジトリ内の配置 | 実装 |
+| --- | --- | --- |
+| Neovim 0.11 以降 | `editors/nvim/` | Lua でファイル種別と LSP 設定を登録する。`ftplugin/` にインデントやコメントの設定、`syntax/` に基本の色付け、`lsp/circuitgame2.lua` にサーバー設定を置く。Neovim 組み込みの LSP クライアントを `vim.lsp.enable("circuitgame2")` で有効にする |
+| VS Code デスクトップ | `editors/vscode/` | `package.json` の言語宣言、言語設定、TextMate grammar、TypeScript の `vscode-languageclient` で構成する。`.cg2` を開いたときに有効になり、サーバーをワークスペース側の拡張ホストで起動する |
+
+初回は開いているファイルと、そこから `include` をたどって到達するファイルを解析する。プロジェクトのルートは最寄りの `circuitgame2.toml` のあるディレクトリを優先し、それがなければ Git リポジトリのルート、それもなければファイルの親ディレクトリとする。両エディタで単独ファイルも解析できる。相対 `include` は記述したファイルのディレクトリを基準に解決し、未保存の変更がエディタから届いていればディスク上の内容より優先する。
+
+初回は CLI リリースにサーバーを含め、両拡張から `PATH` 上の `circuitgame2-lsp` を起動する。Neovim は `editors/nvim/` をルートとするアーカイブを配布し、展開先を `runtimepath` に登録する。VS Code は最初に `.vsix` を配布する。実行ファイルのパスを指定する場合、Neovim はユーザーの LSP 設定、VS Code は実行ホストのマシン設定を使う。VS Code Remote では WSL、SSH 先、またはコンテナ側にサーバーを用意する。対応 OS・CPU のビルドが揃った段階で、VS Code 向けに対象別のサーバーを同梱した VSIX を生成する。各拡張は対応するサーバーバージョンを公開し、VSIX に同梱するサーバーは CLI と同じリリースから取得する。
+
+受け入れテストでは両エディタで共通のサンプルを開き、単独ファイル、複数ファイルの `include`、未保存編集、日本語や絵文字を含む行で診断と定義位置が一致することを検査する。Neovim は headless で、VS Code は拡張のテストホストで起動する。サーバーを起動できない環境では基本の色付けが動作し、起動に必要な情報をユーザーへ表示する。
+
 ## Rust 実装と検査
 
 core は `#![no_std]` と `alloc` を使用する。構文木、診断、ネットリスト、VM 状態は動的な容量を使い、実行環境がアロケータを提供する。構文解析とロード、VM の状態遷移とホスト I/O はそれぞれ別の API とする。core は UTF-8 の入力、型で検査した回路、入力フレームを受け取り、診断と状態遷移の結果を返す。エラー種別は `enum`、ソース位置は span で表し、文面と表示は CLI と Web が担当する。OS 依存のファイル、時計、乱数、Canvas API はアダプターに置く。Web では VM 状態を WASM 側に保持し、描画はコピーした観測値から作る。
@@ -160,7 +175,7 @@ Verus は検査済みネットリストの参照範囲と単一駆動、ゲー�
 | --- | --- |
 | 1. 構文と組み合わせ評価 | NOR、`func`、`def`、複数出力、ビット幅、スライス、struct を実装し、全加算器の真理値表と型・結線エラーの例が通る。native と WASM で同じコアをビルドできる |
 | 2. 順序回路と RAM | SR ラッチ、発振器、RAM の同アドレス読み書き、初期化、インスタンス分離を trace で検証する。1 tick の参照仕様との一致を Verus で確認する |
-| 3. CLI・Web・LSP・統合 | ネイティブ CLI、WASI CLI（`wasm32-wasip2`）、Web で出力 trace が一致する。シミュレーションを進める Web UI と外部デバイスのテストを用意する。LSP と Web で同じ文書の診断と定義位置が一致し、位置変換とシンボル参照を Verus で検証する |
+| 3. CLI・Web・LSP・統合 | ネイティブ CLI、WASI CLI（`wasm32-wasip2`）、Web で出力 trace が一致する。シミュレーションを進める Web UI と外部デバイスのテストを用意する。Neovim、VS Code、Web で同じ文書の診断と定義位置が一致し、位置変換とシンボル参照を Verus で検証する |
 | 4. Lisp | 再帰的な回路生成、時系列のプロパティ、検出した失敗例の再実行ができる |
 
 ## 日本語文書の推敲
@@ -189,3 +204,5 @@ Codex で設計文書を推敲する場合は、[yomiyasu v3.2.0](https://github
 - [Verus の Cargo 統合](https://verus-lang.github.io/verus/guide/cargo_verus.html)、[`no_std + alloc` で `vstd` を使う Regorus の設定](https://docs.rs/crate/regorus/0.12.0/source/Cargo.toml.orig)、[Rust の WebAssembly ターゲット](https://doc.rust-lang.org/rustc/platform-support/wasm32-unknown-unknown.html)
 - [The LispKit Manual Volume 1](https://www.cs.ox.ac.uk/publications/publication3781-abstract.html)
 - [Language Server Protocol の位置エンコーディング](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#position)
+- [Neovim の LSP 設定](https://neovim.io/doc/user/lsp/)、[VS Code の LSP クライアント](https://code.visualstudio.com/api/language-extensions/language-server-extension-guide)、[VS Code 拡張の配布](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#platform-specific-extensions)
+- [共通の言語サーバーを VS Code 拡張に同梱する rust-analyzer の例](https://rust-analyzer.github.io/book/installation.html)
