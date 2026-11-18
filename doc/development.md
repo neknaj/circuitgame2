@@ -37,6 +37,8 @@ core の境界は[設計概要](design.md#実装の境界)、証明の前提と�
 
 仕様には受理条件・観測できる挙動・エラーを記す。必要な規則は型、判断、遷移式で定義し、境界例を添える。設計概要には実装の分担、選択の理由、未決事項を置く。主題ごとに参照する文書を決め、他の文書はその箇所へリンクする。仕様を変更したときは、対応する例と証明・試験の条件も確認する。
 
+仕様本文では、規則が成立する入力・初期状態と、そのとき保証する結果を同じ箇所に記す。例や構文候補はそう分かる見出しや文で示す。解析に使うアルゴリズム、最適化、表示の実装は、参照する仕様の節を示して設計側に記す。例えば周期の意味は[シミュレーション仕様](simulation.md#定常状態と周期定常状態)、その周期の推定方法は[静的解析](static-analysis.md)、推定結果を信頼するための条件は[検証設計](verification.md#仕様との対応)に置く。
+
 数式は [GitHub Docs の数式記法](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/writing-mathematical-expressions)に従う。文中ではドル記号とバッククォートを組み合わせた形式、別行では `math` コードフェンスを使う。数式内の関数名は `\mathrm{...}` で表記し、変更時は GitHub 上で表示を確認する。
 
 ## マクロ評価器の高速化
@@ -74,5 +76,6 @@ Codex で設計文書を推敲する場合は、[yomiyasu v3.2.0](https://github
 - [Neovim の LSP 設定](https://neovim.io/doc/user/lsp/)、[VS Code の LSP クライアント](https://code.visualstudio.com/api/language-extensions/language-server-extension-guide)、[VS Code 拡張の配布](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#platform-specific-extensions)
 - [共通の言語サーバーを VS Code 拡張に同梱する rust-analyzer の例](https://rust-analyzer.github.io/book/installation.html)
 - [Rust Reference](https://doc.rust-lang.org/reference/) の言語仕様とツールの分離、[WebAssembly Core Specification](https://webassembly.github.io/spec/core/) の構造・検証・実行の区分を参照した。
+- [W3C の Specification Guidelines](https://www.w3.org/TR/qaframe-spec/) の規則と参考記述の区分、[WebAssembly の検証アルゴリズム付録](https://webassembly.github.io/spec/core/appendix/algorithm.html) の仕様と検証方法の配置を参照した。
 - [Diátaxis のリファレンス](https://diataxis.fr/reference/)、[NASA の要求記述ガイド](https://www.nasa.gov/reference/appendix-c-how-to-write-a-good-requirement/)、[arc42 の設計文書の構成](https://arc42.org/overview/)を参照した。
 - [FP²: Fully In-Place Functional Programming](https://doi.org/10.1145/3607840) と [Perceus: Garbage Free Reference Counting with Reuse](https://www.microsoft.com/en-us/research/publication/perceus-garbage-free-reference-counting-with-reuse/) を、所有と記憶領域の再利用の参考にした。

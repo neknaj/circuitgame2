@@ -86,11 +86,12 @@
 
 ## 定常化と周期の注釈
 
-`module` 本体の先頭に、任意で `(settles-within N)` または `(periodic-within N p)` を1つ記す。$`N`$ は0以上、$`p`$ は正の整数とする。注釈は、そのモジュールの入力を固定してからの[状態の繰り返し](simulation.md#定常状態と周期定常状態)を宣言する。サブモジュールの注釈の前提は、そのサブモジュール自身の入力ポートについて適用する。
+定常化の上界は[静的解析](static-analysis.md#自動解析)で推定できる。ソースへの記述は任意であり、設計上の期待値を残す場合は、サブモジュールを含めそのモジュール自身の入力ポートについて条件を宣言する。
+
+契約注釈の構文案では、`module` 本体の先頭に `(settles-within N)` または `(periodic-within N p)` を1つ記す。$`N`$ は0以上、$`p`$ は正の整数で、`settles-within` は $`p=1`$ を指定する。[状態の繰り返し](simulation.md#定常状態と周期定常状態)と[条件の検査](static-analysis.md#指定した条件の検査)を参照する。
 
 ```lisp
 (module two-stage (in x) (out y)
-  (settles-within 2)
   (def a (nor x x))
   (def y (nor a a)))
 
@@ -99,7 +100,7 @@
   (def q (nor q q)))
 ```
 
-`two-stage` は固定入力を適用して2 tick 以内に全ゲートが定常になる。`oscillator` は入力を持たず、各 tick で `q` を反転する。reset の直後から2 tick ごとに状態が戻り、基本周期も2である。
+`two-stage` は注釈を持たない。固定入力を適用して2 tick以内に全ゲートが定常になることをゲートの深さから推定できる。`oscillator` の例は、毎 tick 反転する `q` が2 tickごとに戻ることを要求している。この回路では1 tick で必ず値が変わるため、基本周期も2である。
 
 ## 回路テスト
 
