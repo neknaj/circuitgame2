@@ -1,6 +1,6 @@
 # 外部 I/O とメモリの仕様
 
-ルート回路と外付けデバイスの接続規則を定義する。[内蔵 RAM](simulation.md#状態素子)と[標準デバイス](peripherals.md)は各文書を参照する。
+ルート回路と外付けデバイスの接続規則を定義する。接続の指定は[プロジェクト設定](project-config.md)、デバイスの挙動は[内蔵 RAM](simulation.md#状態素子)と[標準デバイス](peripherals.md)を参照する。
 
 ## main のポートへの割り当て
 
