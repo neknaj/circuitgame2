@@ -38,14 +38,18 @@ Verus を適用する各層の CI では、実行用コード、公開定理、�
 | --- | --- |
 | 字句・構文・型・結線 | [回路言語](circuit-language.md) |
 | 参照ステップ、ラッチと RAM、時刻 | [シミュレーション](simulation.md) |
+| 定常化・周期の注釈、深さから求める上界、反例の条件 | [定常状態と周期定常状態](simulation.md#定常状態と周期定常状態) |
 | 外部要求の確定、入力の単一駆動、応答保持と reset 後の識別 | [外部 I/O](memory-io.md) |
 | 純粋関数の停止、実行枠の合成、名前捕捉の防止 | [関数型言語](macros.md) |
 | エラー回復の進捗、診断の根拠、補完候補と編集 | [診断と補完](diagnostics.md) |
 
 実装順序は[ロードマップ](design.md#実装順序)を参照する。ここに掲げる定理は検証計画であり、実装と証明結果は core のコードと CI で確認する。
 
+定常化の検査では、展開したゲートの深さから得た上界が参照ステップについて成立することを Verus で示す。状態遷移の展開による検査を加える場合は、制約が同じ参照ステップから生成されることと、反例の再生が不一致を示すことを検証する。外部ソルバーが反例なしと返した結果を保証に用いる場合は、ソルバーが生成した証明書を検査するか、そのソルバーを信頼する前提を明示する。
+
 ## 参照資料
 
 - [Verus のガイド](https://verus-lang.github.io/verus/guide/)
 - [Vest の検証付きパーサー・シリアライザー](https://www.usenix.org/conference/usenixsecurity25/presentation/cai-yifeng) は、形式仕様を与えたパーサーを Verus で検証する実装例である。
 - [CompCert の意味保存](https://compcert.org/man/manual001.html) は、各コンパイラパスの定理を合成する設計例である。
+- [Biere らの Bounded Model Checking](https://ix.cs.uoregon.edu/~michal/Classes/04u/fsv/readings/Biere-BMC.pdf) は、状態遷移を有限回展開して反例を探索する手法の参考とする。

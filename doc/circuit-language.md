@@ -84,6 +84,23 @@
 
 ラッチと RAM の値の更新は[状態素子の規則](simulation.md#状態素子)に従う。
 
+## 定常化と周期の注釈
+
+`module` 本体の先頭に、任意で `(settles-within N)` または `(periodic-within N p)` を1つ記す。$N$ は0以上、$p$ は正の整数とする。注釈は、そのモジュールの入力を固定してからの[状態の繰り返し](simulation.md#定常状態と周期定常状態)を宣言する。サブモジュールの注釈の前提は、そのサブモジュール自身の入力ポートについて適用する。
+
+```lisp
+(module two-stage (in x) (out y)
+  (settles-within 2)
+  (def a (nor x x))
+  (def y (nor a a)))
+
+(module oscillator (in) (out q)
+  (periodic-within 0 2)
+  (def q (nor q q)))
+```
+
+`two-stage` は固定入力を適用して2 tick 以内に全ゲートが定常になる。`oscillator` は入力を持たず、各 tick で `q` を反転する。reset の直後から2 tick ごとに状態が戻り、基本周期も2である。
+
 ## 回路テスト
 
 ```lisp
