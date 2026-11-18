@@ -12,16 +12,16 @@
 (using nor)
 
 (defmacro double-invert (output input)
-  (syntax
-    ((def tmp (nor (unsyntax input) (unsyntax input)))
-     (def (unsyntax output) (nor tmp tmp)))))
+  (list
+    (syntax (def tmp (nor (unsyntax input) (unsyntax input))))
+    (syntax (def (unsyntax output) (nor tmp tmp)))))
 
 (func example (in x tmp) (out y z)
   (expand double-invert y x)
   (expand double-invert z tmp))
 ```
 
-2回の展開は、それぞれ独立した一時配線 `tmp` を導入する。2回目の `input` に渡す `tmp` は入力ポートを指す。出力先の `y` と `z` は呼び出し元が与えた公開名である。
+`syntax` は構文オブジェクトを1つ返す。`list` は同じ型の値を引数順に集めたリストを返し、この例では構文オブジェクト2個のリストになる。同じ変換器の呼び出しで生成したテンプレート間では、導入した束縛を共有して解決する。2回の展開は、それぞれ独立した一時配線 `tmp` を導入する。2回目の `input` に渡す `tmp` は入力ポートを指す。出力先の `y` と `z` は呼び出し元が与えた公開名である。
 
 ## 純粋関数と構造的な反復
 
