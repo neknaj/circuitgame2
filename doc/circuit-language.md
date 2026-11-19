@@ -4,12 +4,10 @@
 
 ## コア言語
 
-トップレベルは S 式とし、主要フォームは `using`、`include`、`func`、`module`、`struct`、`latch`、`memory`、`test` とする。回路本体で結線を定義するフォームは `def` とする。キーワードは英字を使い、引数の役割は `in`、`out` などの名前で示す。
+トップレベルは S 式とし、主要フォームは `using`、`func`、`module`、`struct`、`latch`、`memory`、`test` とする。回路本体で結線を定義するフォームは `def` とする。キーワードは英字を使い、引数の役割は `in`、`out` などの名前で示す。
 
 ```lisp
 (using nor)
-(include "logic.cg2")
-
 (func buffer (in x) (out x))
 
 (func invert (in x) (out y)
@@ -29,7 +27,7 @@
   (def nq (nor set q)))
 ```
 
-`logic.cg2` には `and`、`xor`、`or` を NOR により定義する。信号値は0または1とし、固定値は定数配線として扱う。呼び出し元は[インクルードの規則](grammar.md#s-式と回路フォーム)に従って UTF-8 のソースを供給する。複数の宣言が同じ名前を定義する場合は診断する。
+設定の `sources` に載せる `logic.ncg2` のルート名前空間に、`and`、`xor`、`or` を NOR で定義する。信号値は0または1とし、固定値は定数配線として扱う。名前空間をまたぐ参照と回路の本体分割は[名前解決](names.md)に従う。
 
 初版の `nor` は1ビット入力2本と1ビット出力1本を持つ。裸のポート名は `(bits 1)` の宣言と同じ型を持ち、`(in)` は入力を持たないことを表す。
 

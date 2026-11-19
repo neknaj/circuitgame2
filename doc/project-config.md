@@ -3,8 +3,8 @@
 プロジェクトの設定は `circuitgame2.toml` に記す。ファイルは TOML 1.0 とし、相対パスは設定ファイルがあるディレクトリを基準に解決する。LSP のプロジェクト探索は[開発と配布](development.md#neovim-と-vs-code-の拡張)を参照する。
 
 ```toml
-source = "main.cg2"
-entry = "main"
+sources = ["main.ncg2", "logic.ncg2", "devices.ncg2m"]
+entry = "::main"
 tick-ns = { numerator = 10, denominator = 1 }
 
 [[device]]
@@ -20,8 +20,8 @@ read-output = "fb-read"
 
 | 項目 | 意味 |
 | --- | --- |
-| `source` | 必須。相対パスでルートの回路ファイルを指定する |
-| `entry` | 省略時は `main`。ルートとして実行するモジュール名 |
+| `sources` | 必須。1件以上の仮想相対パスを列挙する。拡張子とパスを [ソース集合の規則](names.md#ソース集合) に従って検査する |
+| `entry` | 省略時は `::main`。ルートとして実行する回路の `module` を完全修飾名で指定する |
 | `tick-ns` | 正の整数の分子・分母で表す、1 tick あたりのナノ秒。時間指定を使うデバイスを接続する場合は必須 |
 | `device` | 省略可能な配列。各要素に一意の `name`、デバイスの `kind`、デバイス側のポート名からルート側のポート名への `bindings` を指定する。`options` はデバイス固有で省略可能 |
 | `vram` | 省略可能な配列。各要素に公開名 `name` と対象の RAM の読み出し信号 `read-output` を指定する |
@@ -32,6 +32,6 @@ read-output = "fb-read"
 
 初版の `read-output` はルートモジュール本体で `memory` を直接呼んだ `def` の単一出力名を指定する。例えば `(def fb-read (framebuffer address pixels write-enable))` で `framebuffer` が `memory` の宣言名なら、`fb-read` がその RAM インスタンスを特定する。容量と1語の型は素子の宣言から取得する。表示側が参照するのは最後に確定した tick の RAM 内容であり、公開設定により書き込み権限が追加されることはない。
 
-プロジェクト設定を使わず単独ファイルを実行する場合は、そのファイルをルートにし、`main` を選ぶ。外部デバイスの接続はプロジェクト設定を使う。構成の意味検査は共通 core に置き、ファイルの読み込みと TOML から構造化データへの変換は実行環境が扱う。
+プロジェクト設定を使わず単独ファイルを実行する場合は、そのファイルをソース集合とし、`::main` を選ぶ。外部デバイスの接続はプロジェクト設定を使う。構成の意味検査は共通 core に置き、ファイルの読み込みと TOML から構造化データへの変換は実行環境が扱う。
 
 - [TOML 1.0 仕様](https://toml.io/en/v1.0.0)
