@@ -23,6 +23,7 @@
 - [定常化と周期の静的解析](static-analysis.md)
 - [診断と補完](diagnostics.md)
 - [Verus による検証設計](verification.md)
+- [利用者による回路の証明](circuit-proofs.md)
 
 # 開発
 

@@ -30,6 +30,7 @@ circuitgame2 は S 式で記述した論理回路を CLI と Web で同じ tick 
 | --- | --- |
 | 定常化と周期の自動推定、任意の契約の検査、エディタでの表示 | [静的解析](static-analysis.md)、[インレイヒント](development.md#推論結果のインレイヒント) |
 | Verus で検証する性質、仮定、証明のレビュー | [検証設計](verification.md) |
+| 回路の取り込み、共通の意味論、外部 Verus クレートでの証明 | [利用者による回路の証明](circuit-proofs.md) |
 | Cargo、LSP、Neovim と VS Code、配布、文書の更新 | [開発と配布](development.md) |
 | Rust と Verus のコメント、形式証明の書き方 | [コメントとドキュメントコメント](coding_standards/comments.md)、[形式証明](coding_standards/verification.md) |
 
