@@ -17,29 +17,39 @@
   (def y (nor x x)))
 ```
 
-次の生成定義と証明は、1ビットの組み合わせ回路を表す最小モデルの例である。生成定義はゲートと出力の配線を表す。
+次は、各ポートを1ビットとする最小モデルで、この `inverter` を取り込んだ例である。入力ポート、ゲート、出力ポートは、それぞれ0から添字を振る。
 
 ```rust
-pub open spec fn inverter_gates() -> Seq<NorGate> {
-    seq![NorGate { left: Wire::Input, right: Wire::Input }]
-}
-
-pub open spec fn inverter_output() -> Wire {
-    Wire::Gate(0)
+pub open spec fn inverter() -> FuncCircuit {
+    FuncCircuit {
+        inputs: seq!["x"],
+        gates: seq![NorGate {
+            left: Wire::Input(0),
+            right: Wire::Input(0),
+        }],
+        outputs: seq![OutputPort { name: "y", wire: Wire::Gate(0) }],
+    }
 }
 ```
 
-利用者は共通の `eval_func` を使い、任意の入力 `x` に対して出力が `!x` になることを証明する。
+| NCG2 の記述 | Verus の定義での対応 |
+| --- | --- |
+| `(func inverter …)` | 回路全体を `inverter()` で参照する |
+| `(in x)` | `inputs[0]` に名前 `"x"` を記録する。`Wire::Input(0)` がこのポートを参照する |
+| `(nor x x)` | `gates[0]` に NOR を置き、両端を `Wire::Input(0)` に接続する |
+| `(out y)` と `(def y …)` | `outputs[0]` に名前 `"y"` を記録し、右辺の NOR の出力 `Wire::Gate(0)` に接続する |
+
+利用者は `eval_output` に入力列 `seq![x]` と出力ポートの添字 `0` を渡し、任意の入力 `x` に対して出力ポート `y` の値が `!x` になることを証明する。
 
 ```rust
 pub proof fn inverter_correct(x: bool)
-    ensures eval_func(inverter_gates(), inverter_output(), x) == !x,
+    ensures eval_output(inverter(), seq![x], 0) == !x,
 {
     reveal_with_fuel(eval_prefix, 3);
 }
 ```
 
-`eval_prefix` は、最小モデルで `eval_func` が使うゲート列の評価関数である。順序回路には [tick の参照仕様](simulation.md#tick-と状態)に対応した `reset`、`step`、`observe` を用いる。例えば FIFO の仕様は、reset 直後に成立する不変条件と、許容する入力の下で各 tick がその条件を保存することから示せる。
+`eval_prefix` は、最小モデルで `eval_output` が使うゲート列の評価関数である。順序回路には [tick の参照仕様](simulation.md#tick-と状態)に対応した `reset`、`step`、`observe` を用いる。例えば FIFO の仕様は、reset 直後に成立する不変条件と、許容する入力の下で各 tick がその条件を保存することから示せる。
 
 ## ソースと実行結果への接続
 
