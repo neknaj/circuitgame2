@@ -16,6 +16,16 @@
 
 CLI リポジトリには `circuitgame2-lsp` を別バイナリとして置く。標準入出力の JSON-RPC、LSP メッセージと core 型の対応、ファイル URI、セッションと要求の取り消しを担当する。LSP の位置エンコーディングはクライアントと交渉し、指定がない場合は UTF-16 を使う。文字・行位置と UTF-8 byte offset の変換は core の純粋関数を呼び出す。Web エディタは同じ問い合わせを WASM 経由で使う。LSP/JSON-RPC の型は core の公開 API に含めない。
 
+### 編集単位の増分解析
+
+`.ncg2` と `.ncg2m` の各編集を通知順に文書へ適用し、最新の解析スナップショットを直ちに問い合わせの対象とする。複数の置換を含む通知では、一つ前の置換を適用した後の位置を使う。カーソル位置の補完やホバーと、編集中の文書の構文診断を優先し、入力の停止を待たずに処理を始める。変更の影響を受けた他の文書の解析と定常化推定などは後続で行う。文書全体の回復解析や時間のかかる意味解析は、中断を確認できる作業単位に分ける。ホストは編集の適用と診断の公開確定を同じイベント列で直列化し、公開確定時にスナップショットを照合する。入力が途切れたら最新版の解析を完了させる。段階ごとに診断を通知する場合、同じ版で確定した構文診断と意味診断を集約して送る。
+
+core は文書ごとに厳格解析または回復解析の結果を保持する。未変更の文書から構文結果を再利用し、変更文書は局所再解析の条件を満たす場合に影響範囲だけを再解析する。再開位置は、隣接するトークンの結合も考慮して編集範囲より前から選ぶ。変更後のトークン列を読み進め、未変更の接尾部と字句・構文・回復の継続状態の一致が確認できた位置で、接尾部の構文を再利用する。区切り、引用、コメントの変更で一致する境界が得られない場合は、必要な範囲を広げ、文書全体の回復解析まで行う。構文の再利用単位は位置を相対範囲で保持し、親より前の編集で接尾部全体の位置を書き換える処理を省く。診断を返す際に対象版のバイト範囲へ変換する。
+
+意味解析は宣言の見出しと本体を別々に更新する。参照側は、名前解決、型、公開状態など取得した情報に依存する。名前の検索結果には未解決や候補間の衝突を含め、優先される候補が存在しないことにも依存する。候補が追加・削除された場合は検索を再評価する。複数ファイルにある名前空間や `module-part` は、該当する宣言や断片の集合を依存先とする。型検査やマクロ展開が利用する定義も依存先に含める。変更した結果を利用する問い合わせだけに再計算を伝播し、依存先の結果が等しければ以前の意味解析結果を再利用する。診断位置と関連範囲は最新のスナップショットから求める。
+
+性能の計測は、編集の受理から最初の診断の公開まで、および補完要求の受理から応答までの p50 と p95 を、キューで待つ時間を含めて記録する。診断が空の場合も公開時点を記録する。処理したバイト数、再解析した文書数、再評価した問い合わせ数も記録する。大きな単一ファイルと複数ファイルの両方で、本体内の入力、括弧や引用符の削除、宣言の改名、未解決名が解決する編集、連続入力を測る。中断した版の件数と、最後の編集から最新版の診断が公開されるまでの時間も記録する。構文と意味解析の増分更新は[全体解析との一致](verification.md#編集単位の増分解析)を保証する。
+
 ### 推論結果のインレイヒント
 
 VS Code では rust-analyzer の型表示と同じように、ソースの横に推論結果をインレイヒントとして描画する。モジュール名の直後には、[静的解析](static-analysis.md#自動解析)で上界が得られた場合に「定常化 ≤ 2 tick」のように表示する。周期解析を追加した場合は、確認できた結論に応じて「2 tick ごとに状態が戻る」または「基本周期 2 tick」と表示する。回路内の局所配線の幅や、関数型言語のローカル名の型も同じ経路で表示できる。型と実行特性の表示は個別に切り替えられる。
@@ -84,6 +94,7 @@ Codex で設計文書を推敲する場合は、[yomiyasu v3.2.0](https://github
 - [Verus の Cargo 統合](https://verus-lang.github.io/verus/guide/cargo_verus.html)、[`no_std + alloc` で `vstd` を使う Regorus の設定](https://docs.rs/crate/regorus/0.12.0/source/Cargo.toml.orig)、[Rust の WebAssembly ターゲット](https://doc.rust-lang.org/rustc/platform-support/wasm32-unknown-unknown.html)
 - [Language Server Protocol の位置エンコーディング](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#position)
 - [Neovim の LSP 設定](https://neovim.io/doc/user/lsp/)、[VS Code の LSP クライアント](https://code.visualstudio.com/api/language-extensions/language-server-extension-guide)、[VS Code 拡張の配布](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#platform-specific-extensions)
+- [rust-analyzer の増分計算と問い合わせ](https://rust-analyzer.github.io/book/contributing/guide.html#salsa)
 - [共通の言語サーバーを VS Code 拡張に同梱する rust-analyzer の例](https://rust-analyzer.github.io/book/installation.html)
 - [VS Code の Rust インレイヒント](https://code.visualstudio.com/docs/languages/rust#_inlay-hints) と [LSP 3.17 のインレイヒント](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#textDocument_inlayHint)
 - [Rust Reference](https://doc.rust-lang.org/reference/) の言語仕様とツールの分離、[WebAssembly Core Specification](https://webassembly.github.io/spec/core/) の構造・検証・実行の区分を参照した。
