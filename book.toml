@@ -1,0 +1,17 @@
+[book]
+title = "circuitgame2 設計と仕様"
+language = "ja"
+src = "doc"
+
+[build]
+create-missing = false
+
+[preprocessor.github-math]
+command = "python tools/mdbook_math.py"
+renderers = ["html"]
+
+[output.html]
+mathjax-support = true
+git-repository-url = "https://github.com/neknaj/circuitgame2"
+edit-url-template = "https://github.com/neknaj/circuitgame2/edit/main/{path}"
+site-url = "/circuitgame2/docs/"
