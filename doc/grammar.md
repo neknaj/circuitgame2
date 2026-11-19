@@ -7,7 +7,8 @@
 | トークン | 規則 |
 | --- | --- |
 | 名前 | ASCII の英字または `_` で始まり、以降は ASCII の英数字、`_`、`-` を使える。大文字と小文字を区別する |
-| パス | 名前を `::` で連ねる。完全修飾名は先頭にも `::` を置く。区切りの前後に空白を挟まない |
+| 相対パス | 2個以上の名前を `::` で連ねた一つのトークン。例は `logic::invert` |
+| 完全修飾名 | 先頭の `::` に続けて1個以上の名前を `::` で連ねた一つのトークン。例は `::logic::invert` |
 | 自然数 | ASCII の十進数字1桁以上。先頭の0を許す。字句上の値を自然数として読み、用途ごとの範囲検査を行う |
 | 負の整数 | `-` に十進数字を続ける。共通の字句解析で認識し、関数型言語で整数として使う |
 | ビット列 | `#b` に二進数字、または `#x` に十六進数字を1桁以上続ける。十六進数字の英字は大小両方を許す |
@@ -19,7 +20,7 @@
 
 `.ncg2` の開始規則は `circuit-source` とする。
 
-以下は EBNF である。引用符で括った記号はトークン、波括弧は0回以上の繰り返し、角括弧は省略可能を示す。`name`、`nat`、`string`、`bit-literal` は前節のトークンである。S 式の層はアトムとリストの木を作り、回路フォームの層でリストの用途と要素数を確認する。
+以下は EBNF である。引用符で括った記号はトークン、波括弧は0回以上の繰り返し、角括弧は省略可能を示す。`name`、`nat`、`bit-literal`、`relative-path`、`absolute-path` は前節のトークンである。S 式の層はアトムとリストの木を作り、回路フォームの層でリストの用途と要素数を確認する。
 
 ```ebnf
 sexpr       = atom | "(" { sexpr } ")" .
@@ -29,15 +30,16 @@ circuit-item      = use | export | declaration .
 use         = "(" "use" absolute-path name ")" .
 export      = "(" "export" name { name } ")" .
 declaration = routine | module-part | structure | latch | memory | test .
-module-part = "(" "module-part" name { definition } ")" .
-namespace-path = name { "::" name } .
-absolute-path  = "::" namespace-path .
-reference      = namespace-path | absolute-path .
-routine     = "(" ( "func" | "module" ) name inputs outputs { definition } ")" .
+module-part = "(" "module-part" name { body-item } ")" .
+namespace-path = name | relative-path .
+reference      = name | relative-path | absolute-path .
+routine     = "(" ( "func" | "module" ) name inputs outputs { body-item } ")" .
 inputs      = "(" "in" { port } ")" .
-outputs     = "(" "out" { port } ")" .
+outputs     = "(" "out" port { port } ")" .
 port        = name | "(" name type ")" .
 type        = reference | "(" "bits" nat ")" .
+body-item   = definition | expansion .
+expansion   = "(" "expand" reference { sexpr } ")" .
 definition  = "(" "def" targets expr ")" .
 targets     = name | "(" name { name } ")" .
 expr        = name | value | call
@@ -53,10 +55,11 @@ field       = "(" name type "(" "at" nat ")" ")" .
 latch       = "(" "latch" name "(" "width" nat ")" ")" .
 memory      = "(" "memory" name "(" "address" nat ")" "(" "data" type ")" ")" .
 test        = "(" "test" reference ( case { case } | action { action } ) ")" .
-case        = "(" "case" "(" "in" { value } ")" "(" "expect" { expected } ")" ")" .
-action      = "(" "reset" ")" | "(" "drive" { value } ")"
+case        = "(" "case" "(" "in" { test-value } ")" "(" "expect" { expected } ")" ")" .
+action      = "(" "reset" ")" | "(" "drive" { test-value } ")"
             | "(" "tick" nat ")" | "(" "expect" { expected } ")" .
-expected    = value | "any" .
+test-value  = value | "(" "as" reference value ")" .
+expected    = test-value | "any" .
 ```
 
 `atom` は名前、単一アトムとして読んだパス、自然数、負の整数、ビット列または文字列である。`callee` は `reference` のうち、無修飾で式の専用フォームである `bit`、`slice`、`concat`、`field`、`as`、`raw` を除いたものとする。型・値の範囲、式の単一出力、呼び出しの引数とポートの一致は[回路言語の意味規則](circuit-language.md#コア言語)で検査する。
@@ -65,7 +68,7 @@ expected    = value | "any" .
 
 `case` の列は `func`、操作の列は `module` に対して使う。`tick 0` は状態を進めず、設定済みの入力も適用しない。`any` は出力ポート1本分の比較を省略する。
 
-厳格パーサーは入力末尾まで読み、字句・S 式・フォームのいずれかに誤りがあれば拒否する。[回復パーサー](diagnostics.md#エラー回復)も同じ字句規則とフォームを使う。マクロと定常化の契約注釈は拡張として別に扱う。
+厳格パーサーは入力末尾まで読み、字句・S 式・フォームのいずれかに誤りがあれば拒否する。[回復パーサー](diagnostics.md#エラー回復)も同じ字句規則とフォームを使う。`expand` の評価と `.ncg2m` の処理は[実装段階4](design.md#実装順序)に属する。定常化の契約注釈は拡張候補とする。
 
 ## 関数型ソースとマクロ展開
 

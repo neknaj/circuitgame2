@@ -109,7 +109,7 @@ entry = "::app::main"
     (list (syntax (def (unsyntax out) (unsyntax (invert-expression x)))))))
 ```
 
-`::logic` は回路の `buffer` とマクロの `emit-invert` を公開する。補助関数 `invert-expression` の署名は、構文を1個受け取り構文を1個返すことを表す。`main.ncg2` のマクロ展開が生成した `mid` を `output.ncg2` の断片が参照する。出力 `y` は `x` の反転である。
+`::logic` は回路の `buffer` とマクロの `emit-invert` を公開する。補助関数 `invert-expression` の署名は、構文を1個受け取り構文を1個返すことを表す。`main.ncg2` のマクロ展開が生成した `mid` を `output.ncg2` の断片が参照する。入力 `x` を適用した tick の確定時に、その反転が出力 `y` に現れる。
 
 ## 検証する性質
 
