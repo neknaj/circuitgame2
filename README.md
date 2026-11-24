@@ -1,6 +1,6 @@
-# circuitgame2
+# Neknaj Circuit Game 2
 
-circuitgame2 は、circuitgame の後継となる論理回路記述言語 NCG2 と、そのシミュレーターを開発するプロジェクトである。このリポジトリでは NCG2 の仕様と開発計画を管理する。
+neknaj circuit game 2 は、circuitgame の後継となる論理回路記述言語 NCG2 と、そのシミュレーターを開発するプロジェクトである。このリポジトリでは NCG2 の仕様と開発計画を管理する。
 
 ## CLI で回路を試す
 
@@ -9,20 +9,20 @@ Git と Rustup を用意する。以下では順序回路を実行できる開�
 ```sh
 git clone --branch stage3/project-config https://github.com/neknaj/circuitgame2-cli.git
 cd circuitgame2-cli
-git checkout --detach 96eaf9762d75d58f2544a8461c619a86efeeec85
+git checkout --detach 5a1a9d2669c31518fd77a0b1872be3c485c79ad6
 cargo install --path . --locked
-circuitgame2 --version
+ncg2 --version
 ```
 
-`circuitgame2` が見つからない場合は、Cargo が示す実行ファイルの保存先を `PATH` に加える。
+`ncg2` が見つからない場合は、Cargo が示す実行ファイルの保存先を `PATH` に加える。
 
 ### NOR 回路を検査して評価する
 
 引き続き `circuitgame2-cli` ディレクトリで実行する。
 
 ```sh
-circuitgame2 check examples/nor.ncg2
-circuitgame2 eval --func ::gate --input 00 examples/nor.ncg2
+ncg2 check examples/nor.ncg2
+ncg2 eval --func ::gate --input 00 examples/nor.ncg2
 ```
 
 検査に成功すると `検査成功（1 ファイル）` と表示される。続く評価では、入力が両方 0 のときの NOR の出力 `1` が表示される。
@@ -30,7 +30,7 @@ circuitgame2 eval --func ::gate --input 00 examples/nor.ncg2
 ### 順序回路を実行する
 
 ```sh
-circuitgame2 run --input 0110 --input 1000 examples/selected-latch.ncg2
+ncg2 run --input 0110 --input 1000 examples/selected-latch.ncg2
 ```
 
 ```text
@@ -46,10 +46,10 @@ circuitgame2 run --input 0110 --input 1000 examples/selected-latch.ncg2
 付属のプロジェクトで、入力を固定してから 1 tick 以内に状態が定常化することを確認する。
 
 ```sh
-circuitgame2 settle --project examples/project/circuitgame2.toml --within 1
+ncg2 settle --project examples/project/circuitgame2.toml --within 1
 ```
 
-CLI の README に、自分のファイルを実行する手順、ビットの並べ方、同じ子モジュールを二度呼ぶ RAM の例題を載せている。設定ファイルでソースを指定し、公開した RAM の内容を表示する手順も試せる。 [CLI の README](https://github.com/neknaj/circuitgame2-cli/tree/96eaf9762d75d58f2544a8461c619a86efeeec85#readme)
+CLI の README に、自分のファイルを実行する手順、ビットの並べ方、同じ子モジュールを二度呼ぶ RAM の例題を載せている。設定ファイルでソースを指定し、公開した RAM の内容を表示する手順も試せる。 [CLI の README](https://github.com/neknaj/circuitgame2-cli/tree/5a1a9d2669c31518fd77a0b1872be3c485c79ad6#readme)
 CLI の不具合や質問は [CLI の Issues](https://github.com/neknaj/circuitgame2-cli/issues) に投稿できる。
 
 ## 設計と仕様を読む
