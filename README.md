@@ -1,29 +1,33 @@
 # circuitgame2
 
-circuitgame の後継となる論理回路記述言語 NCG2 と、そのシミュレーターを開発するプロジェクト。このリポジトリでは NCG2 の仕様と開発計画を管理する。
+circuitgame2 は、circuitgame の後継となる論理回路記述言語 NCG2 と、そのシミュレーターを開発するプロジェクトである。このリポジトリでは NCG2 の仕様と開発計画を管理する。
 
-## CLI で試す
+## CLI で回路を試す
 
-Rustup と Git を用意し、CLI リポジトリを取得して、付属する NOR の例題を検査・評価する。
+Git と Rustup を用意し、`stage2/clocked-run` ブランチの開発版 CLI をインストールする。手順中のコミットには、実行する例題も含まれる。
 
 ```sh
 git clone https://github.com/neknaj/circuitgame2-cli.git
 cd circuitgame2-cli
-git checkout --detach 1924a245a751ef11e0f853499745001eae93bc6c
-cargo run --quiet --locked -- check examples/nor.ncg2
-cargo run --quiet --locked -- eval --func ::gate --input 00 examples/nor.ncg2
+git checkout --detach 7cdb9c2f53ad5538b0d43743b0d80e9dc10c8100
+cargo install --path . --locked
 ```
 
-検査に成功すると `検査成功（1 ファイル）` と表示される。最後のコマンドは、入力が両方 0 のときの NOR の出力 `1` を表示する。自分のソースを検査する方法や入力ビットの並べ方は [CLI の README](https://github.com/neknaj/circuitgame2-cli/tree/1924a245a751ef11e0f853499745001eae93bc6c#readme) にある。
+`circuitgame2` が見つからない場合は、Cargo が示す実行ファイルの保存先を `PATH` に加える。
 
-### 順序回路を試す
-
-順序回路の実行は、開発版 CLI の `stage2/clocked-run` ブランチで試せる。上の手順で取得した `circuitgame2-cli` のディレクトリで実行する。
+取得したディレクトリで、付属の NOR 回路を検査してから評価する。
 
 ```sh
-git fetch origin stage2/clocked-run
-git checkout --detach d20cccfe1b4450ee6ddaaf990dde904a1511d74d
-cargo run --quiet --locked -- run --input 0110 --input 1000 examples/selected-latch.ncg2
+circuitgame2 check examples/nor.ncg2
+circuitgame2 eval --func ::gate --input 00 examples/nor.ncg2
+```
+
+検査に成功すると `検査成功（1 ファイル）` と表示される。続く評価では、入力が両方 0 のときの NOR の出力 `1` が表示される。
+
+### 順序回路を実行する
+
+```sh
+circuitgame2 run --input 0110 --input 1000 examples/selected-latch.ncg2
 ```
 
 ```text
@@ -32,9 +36,9 @@ cargo run --quiet --locked -- run --input 0110 --input 1000 examples/selected-la
 2 01
 ```
 
-`(def sampled (slice data 0 2 2))` は、入力のビット 0 と 2 を選ぶ。ラッチはビット 1 が 1 の tick でこの値を書き込む。1 tick 目に出力が `01` になり、2 tick 目もその値を保持する。
+1 列目は tick 番号で、0 はリセット直後を表す。2 列目には出力ビット列が並ぶ。`--input` 一つにつき 1 tick 進む。この例では 1 tick 目にラッチへ `01` を書き込み、2 tick 目も値を保持する。
 
-入出力のビットはポートの宣言順に、各ポート内では最下位ビットから並べる。`--input` の指定ごとに 1 tick 進める。出力の1列目は tick 番号で、0 はリセット直後を表す。2列目は出力ビットである。`def` の右辺には信号の直結、信号名を起点にしたビット選択、信号名やリテラルの連接、基底 NOR・ラッチ・RAM の直接呼び出しを書ける。実引数には信号名、ビットリテラル、信号名を起点にした `bit` と `slice` を使える。連接の実行例やオプションは [CLI の README](https://github.com/neknaj/circuitgame2-cli/tree/d20cccfe1b4450ee6ddaaf990dde904a1511d74d#readme) にある。
+自分のファイルを実行する方法、ビットの並べ方、RAM の例題は [CLI の README](https://github.com/neknaj/circuitgame2-cli/tree/7cdb9c2f53ad5538b0d43743b0d80e9dc10c8100#readme) にある。
 
 ## 設計と仕様を読む
 
