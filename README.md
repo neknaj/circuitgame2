@@ -22,7 +22,7 @@ cargo run --quiet --locked -- eval --func ::gate --input 00 examples/nor.ncg2
 
 ```sh
 git fetch origin stage2/clocked-run
-git checkout --detach d021193ccf89c3a6ab2a2edc51f6455e08ba26f9
+git checkout --detach ceb013d14386bed50c58c5950603b8e5311538e2
 cargo run --quiet --locked -- run --input 0110 --input 1000 examples/selected-latch.ncg2
 ```
 
@@ -34,7 +34,7 @@ cargo run --quiet --locked -- run --input 0110 --input 1000 examples/selected-la
 
 この例では、4 ビットの入力からビット 0 と 2 を選んでラッチに渡し、ビット 1 で書き込みを許可する。1 tick 目に出力が `01` になり、2 tick 目もその値を保持する。
 
-入出力のビットはポートの宣言順に、各ポート内では最下位ビットから並べる。`--input` の指定ごとに 1 tick 進める。出力の1列目は tick 番号で、0 はリセット直後を表す。2列目は出力ビットである。`run` で実行する回路は、各 `def` の右辺で基底 NOR、ラッチ、RAM のいずれかを直接呼び出す。実引数には信号名、ビットリテラル、信号名を起点にした `bit` と `slice` を使える。オプションは [CLI の README](https://github.com/neknaj/circuitgame2-cli/tree/d021193ccf89c3a6ab2a2edc51f6455e08ba26f9#readme) にある。
+入出力のビットはポートの宣言順に、各ポート内では最下位ビットから並べる。`--input` の指定ごとに 1 tick 進める。出力の1列目は tick 番号で、0 はリセット直後を表す。2列目は出力ビットである。`run` で実行する回路は、各 `def` の右辺で基底 NOR、ラッチ、RAM のいずれかを直接呼び出す。実引数には信号名、ビットリテラル、信号名を起点にした `bit` と `slice` を使える。オプションは [CLI の README](https://github.com/neknaj/circuitgame2-cli/tree/ceb013d14386bed50c58c5950603b8e5311538e2#readme) にある。
 
 ## 設計と仕様を読む
 
