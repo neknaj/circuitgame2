@@ -7,9 +7,9 @@ circuitgame2 は、circuitgame の後継となる論理回路記述言語 NCG2 �
 Git と Rustup を用意する。以下では順序回路を実行できる開発版 CLI と付属の例題を使う。
 
 ```sh
-git clone --branch stage2/clocked-run https://github.com/neknaj/circuitgame2-cli.git
+git clone --branch stage3/project-config https://github.com/neknaj/circuitgame2-cli.git
 cd circuitgame2-cli
-git checkout --detach c88e49df1d1beb5f644d595b689c8d99d01c7f9e
+git checkout --detach 231a53f9566aacd299ffb1488cf68404f627059b
 cargo install --path . --locked
 circuitgame2 --version
 ```
@@ -41,7 +41,7 @@ circuitgame2 run --input 0110 --input 1000 examples/selected-latch.ncg2
 
 1 列目は tick 番号で、0 はリセット直後を表す。2 列目には出力ビット列が並ぶ。`--input` 一つにつき 1 tick 進む。この例では 1 tick 目にラッチへ `01` を書き込み、2 tick 目も値を保持する。
 
-自分のファイルを実行する方法、ビットの並べ方、同じ子モジュールを二度呼ぶ RAM の例題は [CLI の README](https://github.com/neknaj/circuitgame2-cli/tree/c88e49df1d1beb5f644d595b689c8d99d01c7f9e#readme) にある。
+CLI の README に、自分のファイルを実行する手順、ビットの並べ方、同じ子モジュールを二度呼ぶ RAM の例題を載せている。設定ファイルでソースを指定し、公開した RAM の内容を表示する手順も試せる。 [CLI の README](https://github.com/neknaj/circuitgame2-cli/tree/231a53f9566aacd299ffb1488cf68404f627059b#readme)
 CLI の不具合や質問は [CLI の Issues](https://github.com/neknaj/circuitgame2-cli/issues) に投稿できる。
 
 ## 設計と仕様を読む
