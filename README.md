@@ -9,7 +9,7 @@ Git と Rustup を用意し、`stage2/clocked-run` ブランチの開発版 CLI 
 ```sh
 git clone https://github.com/neknaj/circuitgame2-cli.git
 cd circuitgame2-cli
-git checkout --detach 7cdb9c2f53ad5538b0d43743b0d80e9dc10c8100
+git checkout --detach 9e624595588385c2082b2d0f40418e1b60825650
 cargo install --path . --locked
 ```
 
@@ -38,7 +38,7 @@ circuitgame2 run --input 0110 --input 1000 examples/selected-latch.ncg2
 
 1 列目は tick 番号で、0 はリセット直後を表す。2 列目には出力ビット列が並ぶ。`--input` 一つにつき 1 tick 進む。この例では 1 tick 目にラッチへ `01` を書き込み、2 tick 目も値を保持する。
 
-自分のファイルを実行する方法、ビットの並べ方、RAM の例題は [CLI の README](https://github.com/neknaj/circuitgame2-cli/tree/7cdb9c2f53ad5538b0d43743b0d80e9dc10c8100#readme) にある。
+自分のファイルを実行する方法、ビットの並べ方、同じ子モジュールを二度呼ぶ RAM の例題は [CLI の README](https://github.com/neknaj/circuitgame2-cli/tree/9e624595588385c2082b2d0f40418e1b60825650#readme) にある。
 
 ## 設計と仕様を読む
 
