@@ -16,6 +16,24 @@ cargo run --quiet --locked -- eval --func ::gate --input 00 examples/nor.ncg2
 
 検査に成功すると `検査成功（1 ファイル）` と表示される。最後のコマンドは、入力が両方 0 のときの NOR の出力 `1` を表示する。自分のソースを検査する方法や入力ビットの並べ方は [CLI の README](https://github.com/neknaj/circuitgame2-cli/tree/1924a245a751ef11e0f853499745001eae93bc6c#readme) にある。
 
+### 順序回路を試す
+
+順序回路の実行は、開発版 CLI の `stage2/clocked-run` ブランチで試せる。上の手順で取得した `circuitgame2-cli` のディレクトリで実行する。
+
+```sh
+git fetch origin stage2/clocked-run
+git checkout --detach 517b035165de6f1c265cae0d4f3883c863e89797
+cargo run --quiet --locked -- run --input 11 --input 00 examples/latch.ncg2
+```
+
+```text
+0 00
+1 11
+2 10
+```
+
+入力はポートの宣言順に、各ポート内では最下位ビットから並べる。`--input` の指定ごとに 1 tick 進める。出力の1列目は tick 番号で、0 はリセット直後を表す。2列目は宣言順に並べた出力ビットである。`run` で実行する回路は、各 `def` の右辺で基底 NOR、ラッチ、RAM のいずれかを直接呼び出す。実引数には信号名とビットリテラルを使える。オプションは [CLI の README](https://github.com/neknaj/circuitgame2-cli/tree/517b035165de6f1c265cae0d4f3883c863e89797#readme) にある。
+
 ## 設計と仕様を読む
 
 - [ブラウザーで読む（mdBook）](https://neknaj.github.io/circuitgame2/docs/)
