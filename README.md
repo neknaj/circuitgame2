@@ -9,7 +9,7 @@ Git と Rustup を用意する。以下では順序回路を実行できる開�
 ```sh
 git clone --branch stage3/project-config https://github.com/neknaj/circuitgame2-cli.git
 cd circuitgame2-cli
-git checkout --detach 231a53f9566aacd299ffb1488cf68404f627059b
+git checkout --detach 96eaf9762d75d58f2544a8461c619a86efeeec85
 cargo install --path . --locked
 circuitgame2 --version
 ```
@@ -41,7 +41,15 @@ circuitgame2 run --input 0110 --input 1000 examples/selected-latch.ncg2
 
 1 列目は tick 番号で、0 はリセット直後を表す。2 列目には出力ビット列が並ぶ。`--input` 一つにつき 1 tick 進む。この例では 1 tick 目にラッチへ `01` を書き込み、2 tick 目も値を保持する。
 
-CLI の README に、自分のファイルを実行する手順、ビットの並べ方、同じ子モジュールを二度呼ぶ RAM の例題を載せている。設定ファイルでソースを指定し、公開した RAM の内容を表示する手順も試せる。 [CLI の README](https://github.com/neknaj/circuitgame2-cli/tree/231a53f9566aacd299ffb1488cf68404f627059b#readme)
+### 定常化を調べる
+
+付属のプロジェクトで、入力を固定してから 1 tick 以内に状態が定常化することを確認する。
+
+```sh
+circuitgame2 settle --project examples/project/circuitgame2.toml --within 1
+```
+
+CLI の README に、自分のファイルを実行する手順、ビットの並べ方、同じ子モジュールを二度呼ぶ RAM の例題を載せている。設定ファイルでソースを指定し、公開した RAM の内容を表示する手順も試せる。 [CLI の README](https://github.com/neknaj/circuitgame2-cli/tree/96eaf9762d75d58f2544a8461c619a86efeeec85#readme)
 CLI の不具合や質問は [CLI の Issues](https://github.com/neknaj/circuitgame2-cli/issues) に投稿できる。
 
 ## 設計と仕様を読む
