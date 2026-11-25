@@ -3,6 +3,7 @@ import { execFileSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import { join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import test from "node:test";
 import { chromium } from "playwright";
 
@@ -124,14 +125,26 @@ test("共有プロジェクトの実行とブラウザーでの読み込みを�
   const base = `http://127.0.0.1:${server.address().port}/`;
   // GPU を備えない CI でも、ループバックで配信する共通画面を WebGL で描画する。
   const browser = await chromium.launch({ args: ["--use-gl=angle", "--use-angle=swiftshader"] });
+  const fixtures = fileURLToPath(new URL("./fixtures/", import.meta.url));
   const cases = [
     { name: "project", frames: ["0", "1"], expected: ["0 0", "1 1", "2 0"] },
     { name: "vram", frames: ["1101", "1000"], vram: "screen", expected: ["0 00 0000", "1 00 0010", "2 10 0010"] },
+    {
+      name: "oscillator",
+      folder: join(fixtures, "oscillator"),
+      frames: ["0", "0", "1", "1"],
+      expected: ["0 00", "1 10", "2 00", "3 11", "4 01"],
+    },
+    {
+      name: "sr-latch",
+      folder: join(fixtures, "sr-latch"),
+      frames: ["10", "00", "01", "01", "00"],
+      expected: ["0 00", "1 10", "2 10", "3 00", "4 01", "5 01"],
+    },
   ];
   try {
-    for (const { name, frames, vram, expected } of cases) {
+    for (const { name, folder = join(cli, "examples", name), frames, vram, expected } of cases) {
       await t.test(name, async () => {
-        const folder = join(cli, "examples", name);
         const native = cliTrace(folder, frames, vram);
         assert.deepEqual(native, expected);
         const page = await browser.newPage();

@@ -1,0 +1,2 @@
+(module-part sr-latch
+  (def nq (nor set q)))

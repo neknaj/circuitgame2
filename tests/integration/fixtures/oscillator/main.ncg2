@@ -1,0 +1,6 @@
+(using nor)
+
+(module oscillator
+  (in pin)
+  (out q pin)
+  (def q (nor q 0)))
