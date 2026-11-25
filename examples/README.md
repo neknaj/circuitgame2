@@ -6,6 +6,7 @@
 | [UART で Hello, world!](uart-hello/) | バイトとビット位置を組み合わせ回路に渡して 8N1 を復号する |
 | [順序回路で UART 送信](clocked-uart-transmitter/) | 回路が自律送信する 9600 baud の波形を復号する |
 | [キー行列と I²C 接続の LCD で動かす電卓](keypad-calculator/) | キーを行ごとに読み取り、NCG2 で加減算し、7 セグメントの表示を更新する |
+| [Pico と Pico 2 の GPIO 回路](rp-gpio/) | 名前付き回路ポートをボードの GPIO に結び付け、ファームウェアの配線表を作る |
 
 ## 使い方
 
