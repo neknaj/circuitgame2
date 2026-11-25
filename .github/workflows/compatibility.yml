@@ -7,6 +7,12 @@ on:
         type: string
       cli_ref:
         type: string
+      gui_ref:
+        type: string
+      lib_ref:
+        type: string
+      editors_ref:
+        type: string
   workflow_dispatch:
     inputs:
       core_ref:
@@ -14,6 +20,15 @@ on:
         type: string
       cli_ref:
         description: CLI の候補コミット ID。省略すると main。
+        type: string
+      gui_ref:
+        description: GUI の候補コミット ID。省略すると main。
+        type: string
+      lib_ref:
+        description: lib の候補コミット ID。省略すると main。
+        type: string
+      editors_ref:
+        description: editors の候補コミット ID。省略すると main。
         type: string
   pull_request:
     paths:
@@ -38,6 +53,9 @@ jobs:
         env:
           CORE_REF: ${{ inputs.core_ref }}
           CLI_REF: ${{ inputs.cli_ref }}
+          GUI_REF: ${{ inputs.gui_ref }}
+          LIB_REF: ${{ inputs.lib_ref }}
+          EDITORS_REF: ${{ inputs.editors_ref }}
           ROOT_REF: ${{ github.repository == 'neknaj/circuitgame2' && github.sha || '' }}
         run: |
           set -euo pipefail
@@ -57,9 +75,9 @@ jobs:
           resolve root circuitgame2 "$ROOT_REF"
           resolve core circuitgame2-core "$CORE_REF"
           resolve cli circuitgame2-cli "$CLI_REF"
-          resolve gui circuitgame2-gui ""
-          resolve lib circuitgame2-lib ""
-          resolve editors circuitgame2-editors ""
+          resolve gui circuitgame2-gui "$GUI_REF"
+          resolve lib circuitgame2-lib "$LIB_REF"
+          resolve editors circuitgame2-editors "$EDITORS_REF"
 
   consumers:
     needs: revisions

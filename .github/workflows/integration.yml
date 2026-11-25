@@ -16,7 +16,7 @@ jobs:
     env:
       NCG2_CLI_PATH: ${{ github.workspace }}/cli
       NCG2_WEB_PATH: ${{ github.workspace }}/web
-      NCG2_CORE_SHA: 7738f9fdf74314d77a3871cbd7806e1859add342
+      NCG2_CORE_SHA: 2dfb373ba3b28be0fdf3daa1771d4bd039f441c9
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -24,13 +24,13 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: neknaj/circuitgame2-cli
-          ref: 7ad33ac1b316b9d375e5e200b8b0a3100813c1a4
+          ref: a5c12622baceff9ef80960fc2b540c7da7c932d1
           path: cli
           persist-credentials: false
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: neknaj/circuitgame2-gui
-          ref: 00d84fbcbe15a9b9592f5e9395b299175c9d13af
+          ref: e47310c315b569a73f8dad8b848bc7fbac106e73
           path: web
           persist-credentials: false
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
