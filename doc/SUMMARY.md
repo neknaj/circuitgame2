@@ -5,6 +5,7 @@
 # 言語仕様
 
 - [字句規則と文法](grammar.md)
+- [ソースの整形](formatting.md)
 - [回路言語](circuit-language.md)
 - [ソース集合と名前解決](names.md)
 - [関数型言語の型検査](functional-types.md)

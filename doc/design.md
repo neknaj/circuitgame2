@@ -16,6 +16,7 @@ circuitgame2 は S 式で記述した論理回路を CLI と Web で同じ tick 
 | 調べたいこと | 文書 |
 | --- | --- |
 | S 式の構文、型、結線、回路テスト | [字句と回路文法](grammar.md)、[回路言語](circuit-language.md) |
+| コメントと字句を保つ整形、空白とインデント | [ソースの整形](formatting.md) |
 | ソース集合、名前空間、公開、完全修飾名、別名、回路の本体分割 | [名前解決](names.md)、[複数ファイルのプロジェクト例](names.md#複数ファイルのプロジェクト例) |
 | tick、reset、ラッチ、RAM、仮想時間と実行倍率 | [シミュレーション](simulation.md) |
 | 補助関数、型、評価段階、マクロ、停止性、実行枠 | [構文と型検査](functional-types.md)、[マクロと評価](macros.md) |
