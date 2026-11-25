@@ -4,7 +4,7 @@
 
 配布時は Cargo の git 依存を使用する。core を参照する下流は同一 URL と同一の40桁コミット ID を `rev` に使い、対応する `version` も記す。Cargo は取得先のコミットを `rev` で選び、そのコミットのパッケージが `version` の要件を満たすか検査する。各配布側の `Cargo.lock` をコミットし、CI は `--locked`、`cargo tree -d`、lockfile の core の取得元とコミット ID、およびメインで指定したコミットの一致を確認する。
 
-リリースでは core にタグを付けてコミット ID を確定し、Web と CLI の依存宣言と lockfile を更新する。統合 CI は core、Web、CLI、editors のコミット ID と、editors が使う CLI の LSP サーバーのバージョンを固定して検査する。ローカル開発では checkout を並べ、Cargo の実行ルートに適用される外部設定で `[patch."https://github.com/neknaj/circuitgame2-core"]` に path を指定する。patch 先も `version` 要件を満たす必要がある。ローカル設定と patch に伴う一時的な lockfile の差分は配布から除外する。公開 registry への移行は各クレートを公開できる状態になった時点で判断する。
+リリースでは core にタグを付けてコミット ID を確定し、GUI と CLI の依存宣言と lockfile を更新する。統合 CI は core、GUI、CLI、editors のコミット ID と、editors が使う CLI の LSP サーバーのバージョンを固定して検査する。ローカル開発では checkout を並べ、Cargo の実行ルートに適用される外部設定で `[patch."https://github.com/neknaj/circuitgame2-core"]` に path を指定する。patch 先も `version` 要件を満たす必要がある。ローカル設定と patch に伴う一時的な lockfile の差分は配布から除外する。公開 registry への移行は各クレートを公開できる状態になった時点で判断する。
 
 [回路の統合検査](https://github.com/neknaj/circuitgame2/actions/workflows/integration.yml)は、CLI と Web が同じ Core のコミットに依存することを確かめる。CLI に付属する同じ設定と入力で、ネイティブ CLI、Wasmtime、Chromium の出力を比較する。Chromium ではフォルダーを開き、入力スイッチ、tick、リセットを操作する。公開 VRAM の例では、回路の出力と、書き込みを確定した後の記憶内容を照合する。
 
