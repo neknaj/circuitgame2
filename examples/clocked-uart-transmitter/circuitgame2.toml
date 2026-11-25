@@ -1,0 +1,2 @@
+sources = ["main.ncg2", "vendor/circuitgame2-lib/src/ncg2/logic/gates.ncg2"]
+tick-ns = { numerator = 78125, denominator = 96 }

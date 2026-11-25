@@ -1,0 +1,91 @@
+(using nor)
+
+(latch bit-store (width 1))
+
+(func choose (in select old new) (out value)
+  (def inverted (::ncg2lib::logic::not select))
+  (def hold (::ncg2lib::logic::and inverted old))
+  (def load (::ncg2lib::logic::and select new))
+  (def value (::ncg2lib::logic::or hold load)))
+
+(module delay-2 (in input) (out output)
+  (def middle (bit-store input 1))
+  (def output (bit-store middle 1)))
+
+(module delay-4 (in input) (out output)
+  (def middle (delay-2 input))
+  (def output (delay-2 middle)))
+
+(module delay-8 (in input) (out output)
+  (def middle (delay-4 input))
+  (def output (delay-4 middle)))
+
+(module delay-16 (in input) (out output)
+  (def middle (delay-8 input))
+  (def output (delay-8 middle)))
+
+(module delay-32 (in input) (out output)
+  (def middle (delay-16 input))
+  (def output (delay-16 middle)))
+
+;; NOR と63段の遅延を通るたびに位相が反転し、128 tick で一周する。
+(module bit-clock (in) (out advance)
+  (def after-32 (delay-32 wave))
+  (def after-48 (delay-16 after-32))
+  (def after-56 (delay-8 after-48))
+  (def after-60 (delay-4 after-56))
+  (def after-62 (delay-2 after-60))
+  (def last (bit-store after-62 1))
+  (def wave (nor last last))
+  (def previous-low (nor wave wave))
+  (def falling (nor wave previous-low))
+
+  ;; reset 直後は NOR の両入力が0なので、立ち下がりと同じ信号が1回出る。
+  ;; その信号が通り過ぎてから、ラッチで立ち下がりを取り込む。
+  (def ready-1 (bit-store 1 1))
+  (def ready-2 (bit-store ready-1 1))
+  (def advance (bit-store falling ready-2)))
+
+(module stage (in load next initial advance) (out stored)
+  (def selected (choose load next initial))
+  (def stored (bit-store selected advance)))
+
+(module data-stage (in load next data advance) (out low)
+  (def data-low (::ncg2lib::logic::not data))
+  (def low (stage load next data-low advance)))
+
+;; 保存する1は TX を Low にする指定。reset 後の0と末尾に補う0は High に対応する。
+;; load 時には開始ビット、最下位ビットからのデータ8ビット、停止ビットを並べる。
+;; 次のパルスからは先頭のビットを送り出し、後続の枠から1ビット受け取る。
+(module uart-frame (in (byte (bits 8)) following load advance) (out low)
+  (def low (stage load d0 1 advance))
+  (def d0 (data-stage load d1 (bit byte 0) advance))
+  (def d1 (data-stage load d2 (bit byte 1) advance))
+  (def d2 (data-stage load d3 (bit byte 2) advance))
+  (def d3 (data-stage load d4 (bit byte 3) advance))
+  (def d4 (data-stage load d5 (bit byte 4) advance))
+  (def d5 (data-stage load d6 (bit byte 5) advance))
+  (def d6 (data-stage load d7 (bit byte 6) advance))
+  (def d7 (data-stage load stop (bit byte 7) advance))
+  (def stop (stage load following 0 advance)))
+
+(module main (in) (out tx)
+  (def advance (bit-clock))
+  (def loaded (bit-store 1 advance))
+  (def load (nor loaded loaded))
+
+  ;; ASCII の Hello, world! を先頭から順に接続する。
+  (def frame-00 (uart-frame #x48 frame-01 load advance))
+  (def frame-01 (uart-frame #x65 frame-02 load advance))
+  (def frame-02 (uart-frame #x6c frame-03 load advance))
+  (def frame-03 (uart-frame #x6c frame-04 load advance))
+  (def frame-04 (uart-frame #x6f frame-05 load advance))
+  (def frame-05 (uart-frame #x2c frame-06 load advance))
+  (def frame-06 (uart-frame #x20 frame-07 load advance))
+  (def frame-07 (uart-frame #x77 frame-08 load advance))
+  (def frame-08 (uart-frame #x6f frame-09 load advance))
+  (def frame-09 (uart-frame #x72 frame-10 load advance))
+  (def frame-10 (uart-frame #x6c frame-11 load advance))
+  (def frame-11 (uart-frame #x64 frame-12 load advance))
+  (def frame-12 (uart-frame #x21 0 load advance))
+  (def tx (nor frame-00 frame-00)))
