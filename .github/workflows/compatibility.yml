@@ -1,0 +1,162 @@
+name: Downstream compatibility
+
+on:
+  workflow_call:
+    inputs:
+      core_ref:
+        type: string
+      cli_ref:
+        type: string
+  workflow_dispatch:
+    inputs:
+      core_ref:
+        description: Core の候補コミット ID。省略すると main。
+        type: string
+      cli_ref:
+        description: CLI の候補コミット ID。省略すると main。
+        type: string
+  pull_request:
+    paths:
+      - ".github/workflows/compatibility.yml"
+      - "tests/integration/patch-core.py"
+
+permissions:
+  contents: read
+
+jobs:
+  revisions:
+    runs-on: ubuntu-24.04
+    outputs:
+      root: ${{ steps.refs.outputs.root }}
+      core: ${{ steps.refs.outputs.core }}
+      cli: ${{ steps.refs.outputs.cli }}
+      gui: ${{ steps.refs.outputs.gui }}
+      lib: ${{ steps.refs.outputs.lib }}
+      editors: ${{ steps.refs.outputs.editors }}
+    steps:
+      - id: refs
+        env:
+          CORE_REF: ${{ inputs.core_ref }}
+          CLI_REF: ${{ inputs.cli_ref }}
+          ROOT_REF: ${{ github.repository == 'neknaj/circuitgame2' && github.sha || '' }}
+        run: |
+          set -euo pipefail
+          resolve() {
+            local key="$1" repo="$2" sha="$3"
+            if [[ -z "$sha" ]]; then
+              sha=$(git ls-remote --exit-code "https://github.com/neknaj/$repo" refs/heads/main | cut -f1)
+            fi
+            if [[ ! "$sha" =~ ^[0-9a-f]{40}$ ]]; then
+              echo "$repo: expected a 40-character Git commit ID" >&2
+              return 1
+            fi
+            echo "$repo @ $sha"
+            echo "$key=$sha" >> "$GITHUB_OUTPUT"
+          }
+
+          resolve root circuitgame2 "$ROOT_REF"
+          resolve core circuitgame2-core "$CORE_REF"
+          resolve cli circuitgame2-cli "$CLI_REF"
+          resolve gui circuitgame2-gui ""
+          resolve lib circuitgame2-lib ""
+          resolve editors circuitgame2-editors ""
+
+  consumers:
+    needs: revisions
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, windows-latest]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 25
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: neknaj/circuitgame2
+          ref: ${{ needs.revisions.outputs.root }}
+          path: root
+          persist-credentials: false
+          sparse-checkout: tests/integration/patch-core.py
+          sparse-checkout-cone-mode: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: neknaj/circuitgame2-core
+          ref: ${{ needs.revisions.outputs.core }}
+          path: core
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: neknaj/circuitgame2-cli
+          ref: ${{ needs.revisions.outputs.cli }}
+          path: cli
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: runner.os == 'Linux'
+        with:
+          repository: neknaj/circuitgame2-gui
+          ref: ${{ needs.revisions.outputs.gui }}
+          path: gui
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: runner.os == 'Linux'
+        with:
+          repository: neknaj/circuitgame2-lib
+          ref: ${{ needs.revisions.outputs.lib }}
+          path: lib
+          persist-credentials: false
+      - name: Resolve dependency graph using the candidate Core
+        run: |
+          consumers=(cli)
+          if [[ "$RUNNER_OS" == "Linux" ]]; then
+            consumers+=(gui)
+          fi
+          python root/tests/integration/patch-core.py core "$RUNNER_TEMP/core-patch.toml" "${consumers[@]}"
+      - name: Build and test the native CLI and language server
+        working-directory: cli
+        run: |
+          cargo --config "$RUNNER_TEMP/core-patch.toml" test --locked
+          cargo --config "$RUNNER_TEMP/core-patch.toml" build --locked --bins
+      - name: Check library truth tables with the candidate CLI
+        if: runner.os == 'Linux'
+        working-directory: lib
+        run: python3 tests/check_gates.py ../cli/target/debug/ncg2
+      - name: Build the WASI CLI
+        if: runner.os == 'Linux'
+        working-directory: cli
+        run: |
+          rustup target add wasm32-wasip2
+          cargo --config "$RUNNER_TEMP/core-patch.toml" build --locked --target wasm32-wasip2 --bin ncg2
+      - name: Check the native GUI and build both browser targets
+        if: runner.os == 'Linux'
+        working-directory: gui
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes libgtk-3-dev
+          rustup target add wasm32-unknown-unknown
+          cargo --config "$RUNNER_TEMP/core-patch.toml" test --locked --workspace
+          cargo --config "$RUNNER_TEMP/core-patch.toml" build --locked --target wasm32-unknown-unknown
+          cargo --config "$RUNNER_TEMP/core-patch.toml" build --locked --target wasm32-unknown-unknown -p circuitgame2-gui --lib
+      - name: Share the candidate Windows language server
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: ncg2-candidate-lsp
+          path: cli/target/debug/circuitgame2-lsp.exe
+          if-no-files-found: error
+
+  vscode:
+    needs: [revisions, consumers]
+    uses: neknaj/circuitgame2-editors/.github/workflows/vscode.yml@cbd52eee20db6be325a7087af9dadddb06fd4d8e
+    with:
+      editors_ref: ${{ needs.revisions.outputs.editors }}
+      lsp_artifact: ncg2-candidate-lsp
+
+  neovim:
+    needs: [revisions, consumers]
+    uses: neknaj/circuitgame2-editors/.github/workflows/neovim.yml@cbd52eee20db6be325a7087af9dadddb06fd4d8e
+    with:
+      editors_ref: ${{ needs.revisions.outputs.editors }}
+      lsp_artifact: ncg2-candidate-lsp
