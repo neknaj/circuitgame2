@@ -1,0 +1,1 @@
+sources = ["main.ncg2", "vendor/circuitgame2-lib/src/ncg2/logic/gates.ncg2"]

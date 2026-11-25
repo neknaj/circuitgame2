@@ -51,6 +51,10 @@ ncg2 settle --project examples/project/circuitgame2.toml --within 1
 CLI の README に、自分のファイルを実行する手順、ビットの並べ方、同じ子モジュールを二度呼ぶ RAM の例題を載せている。設定ファイルでソースを指定し、公開した RAM の内容を表示する手順も試せる。[CLI の README](https://github.com/neknaj/circuitgame2-cli#readme)
 CLI の不具合や質問は [CLI の Issues](https://github.com/neknaj/circuitgame2-cli/issues) に投稿できる。
 
+## サンプルプロジェクト
+
+`examples/` に、lib repo の回路を使う半加算器、UART の送信、キー行列と I²C LCD を使う電卓の例を置いている。 [サンプルの一覧と実行手順](examples/)
+
 ## 設計と仕様を読む
 
 - [ブラウザーで読む（mdBook）](https://neknaj.github.io/circuitgame2/docs/)

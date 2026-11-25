@@ -1,0 +1,5 @@
+(using nor)
+
+(func half-adder (in left right) (out sum carry)
+  (def sum (::ncg2lib::logic::xor left right))
+  (def carry (::ncg2lib::logic::and left right)))
