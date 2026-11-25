@@ -3,7 +3,8 @@
 | 例 | 試せること |
 | --- | --- |
 | [半加算器](half-adder/) | lib の XOR と AND を呼び出し、4 通りの入力を検査する |
-| [UART で Hello, world!](uart-hello/) | NCG2 の回路が出す 8N1 波形を復号する |
+| [UART で Hello, world!](uart-hello/) | バイトとビット位置を組み合わせ回路に渡して 8N1 を復号する |
+| [順序回路で UART 送信](clocked-uart-transmitter/) | 回路が自律送信する 9600 baud の波形を復号する |
 | [キー行列と I²C 接続の LCD で動かす電卓](keypad-calculator/) | キーを行ごとに読み取り、NCG2 で加減算し、7 セグメントの表示を更新する |
 
 ## 使い方
