@@ -1,0 +1,6 @@
+(using nor)
+
+(module sr-latch
+  (in set reset)
+  (out q nq)
+  (def q (nor reset nq)))

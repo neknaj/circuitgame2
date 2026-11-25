@@ -6,7 +6,13 @@
 
 リリースでは core にタグを付けてコミット ID を確定し、GUI と CLI の依存宣言と lockfile を更新する。統合 CI は core、GUI、CLI、editors のコミット ID と、editors が使う CLI の LSP サーバーのバージョンを固定して検査する。ローカル開発では checkout を並べ、Cargo の実行ルートに適用される外部設定で `[patch."https://github.com/neknaj/circuitgame2-core"]` に path を指定する。patch 先も `version` 要件を満たす必要がある。ローカル設定と patch に伴う一時的な lockfile の差分は配布から除外する。公開 registry への移行は各クレートを公開できる状態になった時点で判断する。
 
-[回路の統合検査](https://github.com/neknaj/circuitgame2/actions/workflows/integration.yml)は、CLI と Web が同じ Core のコミットに依存することを確かめる。CLI に付属する同じ設定と入力で、ネイティブ CLI、Wasmtime、Chromium の出力を比較する。Chromium ではフォルダーを開き、入力スイッチ、tick、リセットを操作する。公開 VRAM の例では、回路の出力と、書き込みを確定した後の記憶内容を照合する。
+[回路の統合検査](https://github.com/neknaj/circuitgame2/actions/workflows/integration.yml)は、CLI と Web が同じ Core のコミットに依存することを確かめる。CLI に付属する同じ設定と入力で、ネイティブ CLI、Wasmtime、Chromium の出力を比較する。Chromium ではフォルダーを開き、入力スイッチ、tick、リセットを操作する。公開 VRAM の例では、回路の出力と、書き込みを確定した後の記憶内容を照合する。発振器と複数ファイルに分けた SR ラッチでは、組み合わせゲート間の伝搬が tick をまたぐことを出力列で確認する。
+
+## ネイティブとブラウザーの GUI
+
+共通の回路編集と実行画面は egui で実装する。ネイティブ版は OS のフォルダー選択を使い、ブラウザー版は利用者が選んだフォルダーからファイルを読む。読み込んだプロジェクトの編集、Core による実行、結果の表示は同じ Rust のコードを使う。
+
+[GUI の CI](https://github.com/neknaj/circuitgame2-gui/actions/workflows/check.yml)では、Windows のワークスペーステストと実行ファイルのビルド、共通 GUI と従来のブラウザー版の WASM ビルドを確認する。統合 CI では、従来のブラウザー版と CLI の出力列を比較する。共通 GUI は Chromium で起動し、フォルダーの選択とエラー後の読み直しを確認する。
 
 ## 言語サービスと LSP
 

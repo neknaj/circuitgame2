@@ -3,6 +3,7 @@ import { execFileSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import { join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import test from "node:test";
 import { chromium } from "playwright";
 
@@ -12,14 +13,17 @@ const cli = resolve(process.env.NCG2_CLI_PATH);
 const web = resolve(process.env.NCG2_WEB_PATH);
 const ncg2 = join(cli, "target", "debug", process.platform === "win32" ? "ncg2.exe" : "ncg2");
 const component = join(cli, "target", "wasm32-wasip2", "debug", "ncg2.wasm");
-const site = join(web, "site");
 
-function run(file, args, cwd) {
-  return execFileSync(file, args, { cwd, encoding: "utf8", timeout: 30_000 }).trim();
+
+function run(file, args, cwd, options = {}) {
+  return execFileSync(file, args, { cwd, encoding: "utf8", timeout: 30_000, ...options }).trim();
 }
 
 function coreSource(cwd) {
-  const metadata = JSON.parse(run("cargo", ["metadata", "--locked", "--format-version", "1"], cwd));
+  const metadata = JSON.parse(run("cargo", ["metadata", "--locked", "--format-version", "1"], cwd, {
+    // GUI の別ターゲット向け依存も含めて、Core の取り込み方を検査する。
+    maxBuffer: 8 * 1024 * 1024,
+  }));
   const core = metadata.packages.filter(({ name }) => name === "circuitgame2-core");
   assert.equal(core.length, 1);
   const source = core[0].source;
@@ -83,13 +87,17 @@ async function browserTrace(page, folder, frames, vram) {
 
 function serveSite() {
   const assets = new Map([
-    ["/", ["index.html", "text/html; charset=utf-8"]],
-    ["/style.css", ["style.css", "text/css; charset=utf-8"]],
-    ["/main.js", ["main.js", "text/javascript; charset=utf-8"]],
-    ["/project.js", ["project.js", "text/javascript; charset=utf-8"]],
-    ["/examples/main.ncg2", ["examples/main.ncg2", "text/plain; charset=utf-8"]],
-    ["/pkg/circuitgame2_web.js", ["pkg/circuitgame2_web.js", "text/javascript; charset=utf-8"]],
-    ["/pkg/circuitgame2_web_bg.wasm", ["pkg/circuitgame2_web_bg.wasm", "application/wasm"]],
+    ["/", ["site/index.html", "text/html; charset=utf-8"]],
+    ["/style.css", ["site/style.css", "text/css; charset=utf-8"]],
+    ["/main.js", ["site/main.js", "text/javascript; charset=utf-8"]],
+    ["/project.js", ["site/project.js", "text/javascript; charset=utf-8"]],
+    ["/examples/main.ncg2", ["site/examples/main.ncg2", "text/plain; charset=utf-8"]],
+    ["/pkg/circuitgame2_web.js", ["site/pkg/circuitgame2_web.js", "text/javascript; charset=utf-8"]],
+    ["/pkg/circuitgame2_web_bg.wasm", ["site/pkg/circuitgame2_web_bg.wasm", "application/wasm"]],
+    ["/workbench/", ["crates/gui/web/index.html", "text/html; charset=utf-8"]],
+    ["/workbench/start.js", ["crates/gui/web/start.js", "text/javascript; charset=utf-8"]],
+    ["/workbench/pkg/circuitgame2_gui.js", ["crates/gui/web/pkg/circuitgame2_gui.js", "text/javascript; charset=utf-8"]],
+    ["/workbench/pkg/circuitgame2_gui_bg.wasm", ["crates/gui/web/pkg/circuitgame2_gui_bg.wasm", "application/wasm"]],
   ]);
   return createServer(async (request, response) => {
     const asset = assets.get(request.url);
@@ -98,7 +106,7 @@ function serveSite() {
       return;
     }
     try {
-      const contents = await readFile(join(site, asset[0]));
+      const contents = await readFile(join(web, asset[0]));
       response.writeHead(200, { "Content-Type": asset[1] }).end(contents);
     } catch {
       response.writeHead(500).end();
@@ -106,7 +114,7 @@ function serveSite() {
   });
 }
 
-test("共有プロジェクトの出力列がネイティブ、WASI、ブラウザーで一致する", async (t) => {
+test("共有プロジェクトの実行とブラウザーでの読み込みを確認する", async (t) => {
   assert.equal(coreSource(web), coreSource(cli));
   const server = serveSite();
   await new Promise((ok, fail) => {
@@ -114,26 +122,64 @@ test("共有プロジェクトの出力列がネイティブ、WASI、ブラウ�
     server.listen(0, "127.0.0.1", ok);
   });
   t.after(() => new Promise((ok, fail) => server.close((error) => error ? fail(error) : ok())));
-  const browser = await chromium.launch();
+  const base = `http://127.0.0.1:${server.address().port}/`;
+  // GPU を備えない CI でも、ループバックで配信する共通画面を WebGL で描画する。
+  const browser = await chromium.launch({ args: ["--use-gl=angle", "--use-angle=swiftshader"] });
+  const fixtures = fileURLToPath(new URL("./fixtures/", import.meta.url));
   const cases = [
     { name: "project", frames: ["0", "1"], expected: ["0 0", "1 1", "2 0"] },
     { name: "vram", frames: ["1101", "1000"], vram: "screen", expected: ["0 00 0000", "1 00 0010", "2 10 0010"] },
+    {
+      name: "oscillator",
+      folder: join(fixtures, "oscillator"),
+      frames: ["0", "0", "1", "1"],
+      expected: ["0 00", "1 10", "2 00", "3 11", "4 01"],
+    },
+    {
+      name: "sr-latch",
+      folder: join(fixtures, "sr-latch"),
+      frames: ["10", "00", "01", "01", "00"],
+      expected: ["0 00", "1 10", "2 10", "3 00", "4 01", "5 01"],
+    },
   ];
   try {
-    for (const { name, frames, vram, expected } of cases) {
+    for (const { name, folder = join(cli, "examples", name), frames, vram, expected } of cases) {
       await t.test(name, async () => {
-        const folder = join(cli, "examples", name);
         const native = cliTrace(folder, frames, vram);
         assert.deepEqual(native, expected);
         const page = await browser.newPage();
         try {
-          await page.goto(`http://127.0.0.1:${server.address().port}/`);
+          await page.goto(base);
           assert.deepEqual(await browserTrace(page, folder, frames, vram), native);
         } finally {
           await page.close();
         }
       });
     }
+    await t.test("共通 GUI はフォルダーのエラーを表示し、開き直せる", async () => {
+      const page = await browser.newPage();
+      const errors = [];
+      page.on("pageerror", (error) => errors.push(error.message));
+      try {
+        await page.goto(new URL("workbench/", base).href);
+        const folder = page.getByLabel("Open project folder");
+        await folder.waitFor();
+        const canvas = page.locator("canvas#workbench");
+        const initial = await canvas.screenshot();
+
+        await folder.setInputFiles(join(web, "site", "examples"));
+        await page.waitForFunction(() => document.querySelector("#project-status")
+          .textContent.includes("circuitgame2.toml がない"));
+
+        await folder.setInputFiles(join(cli, "examples", "project"));
+        await page.waitForFunction(() => document.querySelector("#project-status").textContent === "");
+        assert.equal(await page.locator("#status").isVisible(), false);
+        assert.notDeepEqual(await canvas.screenshot(), initial);
+        assert.deepEqual(errors, []);
+      } finally {
+        await page.close();
+      }
+    });
   } finally {
     await browser.close();
   }

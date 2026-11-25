@@ -30,7 +30,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: neknaj/circuitgame2-gui
-          ref: fd68ed525e394cd304471c1a4bc6f905f53f5c07
+          ref: 6a898974a8d8face156e455db4bfe8f09bf5736c
           path: web
           persist-credentials: false
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
@@ -43,14 +43,16 @@ jobs:
           cargo tree --locked -d
           cargo build --locked --bin ncg2
           cargo build --locked --target wasm32-wasip2 --bin ncg2
-      - name: Build the browser simulator
+      - name: Build the browser simulators
         working-directory: web
         run: |
           rustup target add wasm32-unknown-unknown
           cargo tree --locked -d
           cargo install wasm-bindgen-cli --version 0.2.129 --locked
           cargo build --locked --target wasm32-unknown-unknown
+          cargo build --locked --target wasm32-unknown-unknown -p circuitgame2-gui --lib
           wasm-bindgen --target web --out-dir site/pkg target/wasm32-unknown-unknown/debug/circuitgame2_web.wasm
+          wasm-bindgen --target web --out-dir crates/gui/web/pkg target/wasm32-unknown-unknown/debug/circuitgame2_gui.wasm
       - name: Install Wasmtime
         working-directory: ${{ runner.temp }}
         run: |
