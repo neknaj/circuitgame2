@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import { join, resolve } from "node:path";
@@ -141,6 +141,27 @@ test("自律 UART の全波形がネイティブと WASI で一致する", () =>
     "-B", "-c", "import sys; from demo import parse_trace, receive; print(receive(parse_trace(sys.stdin.read())))",
   ], folder, { input: trace.join("\n") });
   assert.equal(message, "Hello, world!");
+});
+
+test("NCG2M の評価結果と実行枠の打ち切りをネイティブと WASI で確認する", () => {
+  const folder = fileURLToPath(new URL("../../examples/ncg2m-helpers/", import.meta.url));
+  const args = (fuel) => [
+    "eval-meta", "--defn", "::demo::may-run", "--arg", "true", "--arg", "false",
+    "--fuel", fuel, "--project", "circuitgame2.toml",
+  ];
+  assert.deepEqual(compareCliTraces(folder, args("100")), ["true"]);
+
+  const budget = args("1");
+  const options = { cwd: folder, encoding: "utf8", timeout: 30_000 };
+  const native = spawnSync(ncg2, budget, options);
+  const wasi = spawnSync("wasmtime", ["run", "--dir=.", component, ...budget], options);
+  // Wasmtime は WASI Preview 2 の失敗を終了コード 1 として返す。
+  for (const [result, code] of [[native, 2], [wasi, 1]]) {
+    assert.ifError(result.error);
+    assert.equal(result.status, code);
+    assert.equal(result.stdout, "");
+    assert.match(result.stderr, /指定した fuel の範囲で評価が完了しなかった/);
+  }
 });
 
 test("共有プロジェクトの実行とブラウザーでの読み込みを確認する", async (t) => {
