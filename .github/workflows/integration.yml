@@ -30,7 +30,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: neknaj/circuitgame2-gui
-          ref: fd68ed525e394cd304471c1a4bc6f905f53f5c07
+          ref: 6a898974a8d8face156e455db4bfe8f09bf5736c
           path: web
           persist-credentials: false
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6

@@ -8,6 +8,12 @@
 
 [回路の統合検査](https://github.com/neknaj/circuitgame2/actions/workflows/integration.yml)は、CLI と Web が同じ Core のコミットに依存することを確かめる。CLI に付属する同じ設定と入力で、ネイティブ CLI、Wasmtime、Chromium の出力を比較する。Chromium ではフォルダーを開き、入力スイッチ、tick、リセットを操作する。公開 VRAM の例では、回路の出力と、書き込みを確定した後の記憶内容を照合する。
 
+## ネイティブとブラウザーの GUI
+
+共通の回路編集と実行画面は egui で実装する。ネイティブ版は OS のフォルダー選択を使い、ブラウザー版は利用者が選んだフォルダーからファイルを読む。読み込んだプロジェクトの編集、Core による実行、結果の表示は同じ Rust のコードを使う。
+
+[GUI の CI](https://github.com/neknaj/circuitgame2-gui/actions/workflows/check.yml)では、Windows のワークスペーステストと実行ファイルのビルド、共通 GUI と従来のブラウザー版の WASM ビルドを確認する。リポジトリをまたぐ出力列の比較は、現時点では従来のブラウザー版を対象とする。
+
 ## 言語サービスと LSP
 
 エディタに返す回路記述言語と純粋関数型言語の[診断・エラー回復・補完](diagnostics.md)は core の共通仕様に従う。LSP は core が返す位置、関連範囲、候補編集をプロトコルの型に変換する。
