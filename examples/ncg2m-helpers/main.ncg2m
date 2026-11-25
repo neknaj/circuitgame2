@@ -1,0 +1,8 @@
+(namespace demo
+  (export may-run)
+  (use ::ncg2lib::bool::not invert)
+
+  (defn may-run
+    (as-type (Fn (Bool Bool) Bool)
+      (fn (ready blocked)
+        (::ncg2lib::bool::and ready (invert blocked))))))

@@ -141,10 +141,18 @@ jobs:
         if: runner.os == 'Linux'
         working-directory: lib
         run: python3 tests/check_gates.py ../cli/target/debug/ncg2
-      - name: Check NCG2M library helpers with the candidate CLI
+      - name: Check and evaluate NCG2M library helpers with the candidate CLI
         if: runner.os == 'Linux'
         working-directory: lib
-        run: ../cli/target/debug/ncg2 check src/ncg2m/bool/logic.ncg2m
+        run: |
+          source=src/ncg2m/bool/logic.ncg2m
+          ../cli/target/debug/ncg2 check "$source"
+          result=$(../cli/target/debug/ncg2 eval-meta --defn ::ncg2lib::bool::xor \
+            --arg true --arg false --fuel 100 "$source")
+          if [[ "$result" != true ]]; then
+            printf 'Expected true from NCG2M xor, got %s\n' "$result" >&2
+            exit 1
+          fi
       - name: Build the WASI CLI
         if: runner.os == 'Linux'
         working-directory: cli
