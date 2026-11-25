@@ -141,6 +141,10 @@ jobs:
         if: runner.os == 'Linux'
         working-directory: lib
         run: python3 tests/check_gates.py ../cli/target/debug/ncg2
+      - name: Check NCG2M library helpers with the candidate CLI
+        if: runner.os == 'Linux'
+        working-directory: lib
+        run: ../cli/target/debug/ncg2 check src/ncg2m/bool/logic.ncg2m
       - name: Build the WASI CLI
         if: runner.os == 'Linux'
         working-directory: cli
