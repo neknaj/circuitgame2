@@ -43,3 +43,7 @@ HostRequest = Notify(NotificationPayload)
 `uart-terminal` は回路の `tx` を観測し、回路の `rx` を駆動する。両ポートの型は1ビットとする。初版のオプションは正の整数の `baud` で、フレーム形式は 8N1 とする。接続時に tick 周期が指定されていることと、既知のビット時間を[シミュレーションの時間規則](simulation.md#tick-とシミュレーション時間)で表せることを検査する。
 
 このデバイスへの入力は `TerminalInput(Bytes)` とし、回路へ送るバイト列をキューに追加する。送るデータがなければ `rx` を High にする。回路から受信したバイトとフレーミングエラーは、応答を待たない `TerminalOutput(Byte)` と `TerminalFramingError` でホストへ通知する。シリアルモニターの文字符号化と表示はホストが扱う。初期化と reset は送受信の途中状態と送信待ちキューを空にする。受信側は High を観測した後の立ち下がりを開始ビットの候補とする。
+
+## I²C 接続の7セグメント LCD
+
+`i2c-pcf8576d` のポート、設定、バスと表示の状態遷移は [I²C 接続の7セグメント LCD](peripherals/i2c-pcf8576d.md)に従う。

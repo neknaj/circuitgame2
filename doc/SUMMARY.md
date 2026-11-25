@@ -19,6 +19,7 @@
 - [外部 I/O とメモリ](memory-io.md)
   - [デバイスの初期化とホスト境界](device-contract.md)
   - [標準の入出力デバイス](peripherals.md)
+    - [I²C 接続の7セグメント LCD](peripherals/i2c-pcf8576d.md)
 
 # 解析と検証
 
