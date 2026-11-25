@@ -40,11 +40,12 @@ circuitgame2 は S 式で記述した論理回路を CLI と Web で同じ tick 
 | --- | --- |
 | [circuitgame2](https://github.com/neknaj/circuitgame2) | `doc/` の仕様、共通サンプル、期待する出力・trace、リリースの組み合わせを検査する CI |
 | [circuitgame2-core](https://github.com/neknaj/circuitgame2-core) | Rust の構文解析、型・結線検査、ネットリスト、VM、テスト実行、エディタ向け言語サービス、純粋関数型の評価器、Verus の仕様と証明 |
-| [circuitgame2-web](https://github.com/neknaj/circuitgame2-web) | WASM バインディング、エディタ、可視化、ブラウザの入出力と永続化 |
+| [circuitgame2-gui](https://github.com/neknaj/circuitgame2-gui) | ブラウザの実行画面と WASM バインディング。エディタ、可視化、永続化、ネイティブ GUI も段階的に担当する |
 | [circuitgame2-cli](https://github.com/neknaj/circuitgame2-cli) | Rust のコマンド、診断表示、ファイル入出力、ネイティブと WASI の実行環境、LSP サーバーの通信・プロトコル変換 |
 | [circuitgame2-editors](https://github.com/neknaj/circuitgame2-editors) | Neovim と VS Code の拡張、エディタ別のパッケージ作成、LSP サーバーとの互換性テスト |
+| [circuitgame2-lib](https://github.com/neknaj/circuitgame2-lib) | NCG2 の汎用回路と NCG2M の補助関数。利用側のプロジェクトに組み込むソースとして配布する |
 
-Web と CLI は core に直接依存する。メインの統合 CI は各リポジトリのコミットを指定してチェックアウトし、共通サンプルを検査する。core 内のライブラリや証明は必要に応じて Cargo workspace 内のクレートに分ける。メイン、core、web、CLI に editors を加えた5リポジトリで構成する。editors は CLI が配布する `circuitgame2-lsp` を LSP 経由で利用する。エディタ固有の設定や配布を変更したときは、editors から対象の拡張だけを更新できる。
+GUI と CLI は core に直接依存する。メインの統合 CI は各リポジトリのコミットを指定してチェックアウトし、共通サンプルを検査する。core 内のライブラリや証明は必要に応じて Cargo workspace 内のクレートに分ける。メイン、core、GUI、CLI、editors、lib の6リポジトリで構成する。editors は CLI が配布する `circuitgame2-lsp` を LSP 経由で利用する。エディタ固有の設定や配布を変更したときは、editors から対象の拡張だけを更新できる。
 
 ## 実装の境界
 
