@@ -1,0 +1,27 @@
+board = "pico2"
+
+[[gpio]]
+direction = "input"
+port = "b"
+pin = 7
+
+[[gpio]]
+direction = "output"
+port = "y"
+pin = 3
+initial_high = true
+
+[[gpio]]
+direction = "input"
+port = "a"
+pin = 2
+
+[[gpio]]
+direction = "output"
+port = "y"
+pin = 4
+
+[[gpio]]
+direction = "output"
+port = "x"
+pin = 5

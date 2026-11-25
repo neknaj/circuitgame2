@@ -1,0 +1,6 @@
+(using nor)
+(module main
+  (in a b)
+  (out x y)
+  (def x (::ncg2lib::logic::not a))
+  (def y (nor x b)))
