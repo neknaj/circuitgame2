@@ -14,12 +14,15 @@ const ncg2 = join(cli, "target", "debug", process.platform === "win32" ? "ncg2.e
 const component = join(cli, "target", "wasm32-wasip2", "debug", "ncg2.wasm");
 const site = join(web, "site");
 
-function run(file, args, cwd) {
-  return execFileSync(file, args, { cwd, encoding: "utf8", timeout: 30_000 }).trim();
+function run(file, args, cwd, options = {}) {
+  return execFileSync(file, args, { cwd, encoding: "utf8", timeout: 30_000, ...options }).trim();
 }
 
 function coreSource(cwd) {
-  const metadata = JSON.parse(run("cargo", ["metadata", "--locked", "--format-version", "1"], cwd));
+  const metadata = JSON.parse(run("cargo", ["metadata", "--locked", "--format-version", "1"], cwd, {
+    // GUI の別ターゲット向け依存も含めて、Core の取り込み方を検査する。
+    maxBuffer: 8 * 1024 * 1024,
+  }));
   const core = metadata.packages.filter(({ name }) => name === "circuitgame2-core");
   assert.equal(core.length, 1);
   const source = core[0].source;
