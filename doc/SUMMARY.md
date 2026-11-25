@@ -14,6 +14,7 @@
 # 実行と外部 I/O
 
 - [シミュレーション](simulation.md)
+  - [GPU と RP マイコンの実行バックエンド](backends.md)
 - [プロジェクトの実行設定](project-config.md)
 - [外部 I/O とメモリ](memory-io.md)
   - [デバイスの初期化とホスト境界](device-contract.md)
