@@ -1,6 +1,6 @@
 # Neknaj Circuit Game 2
 
-neknaj circuit game 2 は、circuitgame の後継となる論理回路記述言語 NCG2 と、そのシミュレーターを開発するプロジェクトである。このリポジトリでは NCG2 の仕様と開発計画を管理する。
+Neknaj Circuit Game 2 は、circuitgame の後継として論理回路記述言語 NCG2 とそのシミュレーターを開発するプロジェクト。CLI で組み合わせ回路を評価でき、順序回路は CLI とブラウザーで 1 tick ずつ実行できる。このリポジトリには言語仕様、開発計画、サンプルを置く。
 
 ## CLI で回路を試す
 
@@ -40,20 +40,23 @@ ncg2 run --input 0110 --input 1000 examples/selected-latch.ncg2
 
 1 列目は tick 番号で、0 はリセット直後を表す。2 列目には出力ビット列が並ぶ。`--input` 一つにつき 1 tick 進む。この例では 1 tick 目にラッチへ `01` を書き込み、2 tick 目も値を保持する。
 
-### 定常化を調べる
+CLI の README には、複数ファイルのプロジェクトを実行する手順、RAM の内容を読む例、定常化を調べる方法を掲載している。 [CLI の使い方](https://github.com/neknaj/circuitgame2-cli#readme)
 
-付属のプロジェクトで、入力を固定してから 1 tick 以内に状態が定常化することを確認する。
+## ブラウザーで回路を試す
 
-```sh
-ncg2 settle --project examples/project/circuitgame2.toml --within 1
-```
+[公開 GUI](https://neknaj.github.io/circuitgame2-gui/) を開くと、付属の回路を編集し、入力を切り替えながら 1 tick ずつ実行できる。自分のプロジェクトを開くには「Open project folder」で `circuitgame2.toml` のあるフォルダーを選ぶ。同じ GUI をネイティブで起動する手順もある。 [GUI の使い方](https://github.com/neknaj/circuitgame2-gui#readme)
 
-CLI の README に、自分のファイルを実行する手順、ビットの並べ方、同じ子モジュールを二度呼ぶ RAM の例題を載せている。設定ファイルでソースを指定し、公開した RAM の内容を表示する手順も試せる。[CLI の README](https://github.com/neknaj/circuitgame2-cli#readme)
-CLI の不具合や質問は [CLI の Issues](https://github.com/neknaj/circuitgame2-cli/issues) に投稿できる。
+## エディタで回路を書く
+
+VS Code または Neovim の拡張と `circuitgame2-lsp` をインストールすると、`.ncg2` ファイルで診断と定義移動を使える。 [エディタ拡張の入手と設定](https://github.com/neknaj/circuitgame2-editors#readme)
 
 ## サンプルプロジェクト
 
-`examples/` に、lib repo の回路を使う半加算器、UART の送信、キー行列と I²C LCD を使う電卓の例を置いている。 [サンプルの一覧と実行手順](examples/)
+- 半加算器で、lib の回路を使う。
+- 自律 UART 送信機が `Hello, world!` を送る波形を CLI で取得し、9600 baud の 8N1 として復号する。
+- NCG2 の加減算回路と、Python で模擬したキー行列・I²C 接続の 7 セグメント LCD を組み合わせて電卓を動かす。
+
+各サンプルの起動方法と、必要なライブラリの取得手順を掲載している。 [サンプル一覧](examples/) · [回路と補助関数のライブラリ](https://github.com/neknaj/circuitgame2-lib#readme)
 
 ## 設計と仕様を読む
 
@@ -61,4 +64,6 @@ CLI の不具合や質問は [CLI の Issues](https://github.com/neknaj/circuitg
 - [設計文書の案内と実装順序](doc/design.md)
 - [開発と配布](doc/development.md)
 
-CLI と Web で共用する Rust ライブラリの使用例と検証コマンドは [core の README](https://github.com/neknaj/circuitgame2-core#readme) にある。
+Rust から Core を使う例と、開発時に実行する検証コマンドを掲載している。 [Core の README](https://github.com/neknaj/circuitgame2-core#readme)
+
+プロジェクト全体の仕様やサンプルの不具合・質問は root repo で受け付ける。CLI、GUI、エディタ拡張に固有の内容は、それぞれのリポジトリに報告できる。 [プロジェクトの Issues](https://github.com/neknaj/circuitgame2/issues)
