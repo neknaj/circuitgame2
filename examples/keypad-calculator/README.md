@@ -13,6 +13,8 @@ python demo.py "3-12="
 
 ## キー行列と LCD のモデル
 
+NCG2M で実装するモデルのポートと tick は [I²C 接続の7セグメント LCD](../../doc/peripherals/i2c-pcf8576d.md)に定める。この例の Python は各クロック位相の代表点を並べ、書き込むバイトとセグメントの対応を確かめる。実行時の tick 列は NCG2M モデルの実装後に検査する。
+
 ```text
 1 2 3 +
 4 5 6 -
