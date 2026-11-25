@@ -1,0 +1,11 @@
+(using nor)
+(module main
+  (in b0 b1 b2 b3 b4 b5 b6 b7 received framing overrun ready sent ok)
+  (out b0 b1 b2 b3 b4 b5 b6 b7 send ready accept-result)
+  (def not-received (nor received received))
+  (def error-free (nor framing overrun))
+  (def invalid (nor error-free error-free))
+  (def send (nor not-received invalid))
+  (def not-ready (nor ready ready))
+  (def low (nor ready not-ready))
+  (def accept-result (nor low low)))

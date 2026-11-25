@@ -1,0 +1,18 @@
+board = "pico2"
+
+[uart]
+instance = 0
+tx-pin = 0
+rx-pin = 1
+baud = 115200
+rx-data = ["b0", "b1", "b2", "b3", "b4", "b5", "b6", "b7"]
+rx-valid = "received"
+rx-framing = "framing"
+rx-overrun = "overrun"
+rx-ready = "ready"
+tx-data = ["b0", "b1", "b2", "b3", "b4", "b5", "b6", "b7"]
+tx-valid = "send"
+tx-ready = "ready"
+tx-done = "sent"
+tx-ok = "ok"
+tx-done-ready = "accept-result"
