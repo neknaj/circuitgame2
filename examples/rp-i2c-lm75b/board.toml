@@ -1,0 +1,28 @@
+board = "pico2"
+
+[[gpio]]
+direction = "input"
+port = "button"
+pin = 2
+
+[[gpio]]
+direction = "output"
+port = "data0"
+pin = 5
+
+[i2c]
+instance = 0
+sda-pin = 0
+scl-pin = 1
+frequency-hz = 100000
+timeout-micros = 20000
+request-ready = "request-ready"
+response-valid = "response-valid"
+response-status = ["status0", "status1", "status2"]
+read-data = ["data0", "data1", "data2", "data3", "data4", "data5", "data6", "data7"]
+request-valid = "request"
+response-ready = "one"
+address = ["zero", "zero", "zero", "one", "zero", "zero", "one"]
+write-length = ["one", "zero", "zero", "zero", "zero", "zero", "zero", "zero"]
+read-length = ["one", "zero", "zero", "zero", "zero", "zero", "zero", "zero"]
+write-data = ["one", "zero", "zero", "zero", "zero", "zero", "zero", "zero"]

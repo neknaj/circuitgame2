@@ -9,6 +9,7 @@
 | [キー行列と I²C 接続の LCD で動かす電卓](keypad-calculator/) | キーを行ごとに読み取り、NCG2 で加減算し、7 セグメントの表示を更新する |
 | [Pico と Pico 2 の GPIO 回路](rp-gpio/) | 名前付き回路ポートをボードの GPIO に結び付け、ファームウェアの配線表を作る |
 | [Pico と Pico 2 の UART エコー](rp-uart-loopback/) | ボードの実 UART で受け取った1バイトを送り返す |
+| [Pico と Pico 2 で LM75B の設定を読む](rp-i2c-lm75b/) | ハードウェア I²C で設定レジスタを読み、回路の出力を GPIO で観測する |
 
 ## 使い方
 

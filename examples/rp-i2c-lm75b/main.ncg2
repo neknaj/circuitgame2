@@ -1,0 +1,10 @@
+(using nor)
+
+(module main
+  (in button request-ready response-valid status0 status1 status2
+      data0 data1 data2 data3 data4 data5 data6 data7)
+  (out request one zero data0)
+  (def button-low (nor button button))
+  (def request (nor button-low button-low))
+  (def one (nor 0 0))
+  (def zero (nor 1 1)))
