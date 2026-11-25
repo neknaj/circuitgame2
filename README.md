@@ -4,12 +4,11 @@ neknaj circuit game 2 は、circuitgame の後継となる論理回路記述言�
 
 ## CLI で回路を試す
 
-Git と Rustup を用意する。以下では順序回路を実行できる開発版 CLI と付属の例題を使う。
+Git と Rustup を用意し、CLI と付属の例題を取得する。
 
 ```sh
-git clone --branch stage3/project-config https://github.com/neknaj/circuitgame2-cli.git
+git clone https://github.com/neknaj/circuitgame2-cli.git
 cd circuitgame2-cli
-git checkout --detach 5a1a9d2669c31518fd77a0b1872be3c485c79ad6
 cargo install --path . --locked
 ncg2 --version
 ```
@@ -49,7 +48,7 @@ ncg2 run --input 0110 --input 1000 examples/selected-latch.ncg2
 ncg2 settle --project examples/project/circuitgame2.toml --within 1
 ```
 
-CLI の README に、自分のファイルを実行する手順、ビットの並べ方、同じ子モジュールを二度呼ぶ RAM の例題を載せている。設定ファイルでソースを指定し、公開した RAM の内容を表示する手順も試せる。 [CLI の README](https://github.com/neknaj/circuitgame2-cli/tree/5a1a9d2669c31518fd77a0b1872be3c485c79ad6#readme)
+CLI の README に、自分のファイルを実行する手順、ビットの並べ方、同じ子モジュールを二度呼ぶ RAM の例題を載せている。設定ファイルでソースを指定し、公開した RAM の内容を表示する手順も試せる。[CLI の README](https://github.com/neknaj/circuitgame2-cli#readme)
 CLI の不具合や質問は [CLI の Issues](https://github.com/neknaj/circuitgame2-cli/issues) に投稿できる。
 
 ## 設計と仕様を読む
