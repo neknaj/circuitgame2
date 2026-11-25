@@ -35,6 +35,7 @@ on:
       - ".github/workflows/compatibility.yml"
       - "tests/integration/patch-core.py"
       - "examples/rp-i2c-lm75b/**"
+      - "examples/rp-spi-loopback/**"
 
 permissions:
   contents: read
@@ -101,6 +102,7 @@ jobs:
           sparse-checkout: |
             tests/integration/patch-core.py
             examples/rp-i2c-lm75b
+            examples/rp-spi-loopback
           sparse-checkout-cone-mode: false
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -140,23 +142,28 @@ jobs:
         run: |
           cargo --config "$RUNNER_TEMP/core-patch.toml" test --locked
           cargo --config "$RUNNER_TEMP/core-patch.toml" build --locked --bins
-      - name: Build Pico and Pico 2 firmware from the sample project
+      - name: Build Pico and Pico 2 firmware from the I²C and SPI sample projects
         if: runner.os == 'Linux'
         working-directory: core
         run: |
-          sample=../root/examples/rp-i2c-lm75b
           rustup target add thumbv6m-none-eabi thumbv8m.main-none-eabihf
-          sed 's/^board = "pico2"$/board = "pico"/' "$sample/board.toml" > "$RUNNER_TEMP/board-pico.toml"
-          ../cli/target/debug/ncg2 rp-plan --project "$sample/circuitgame2.toml" \
-            --board "$RUNNER_TEMP/board-pico.toml" > "$RUNNER_TEMP/pico.plan"
-          NCG2_RP_PROGRAM="$RUNNER_TEMP/pico.plan" \
-            cargo build --manifest-path firmware/rp/Cargo.toml --locked --release \
-              --target thumbv6m-none-eabi --features pico,i2c --bin ncg2-rp
-          ../cli/target/debug/ncg2 rp-plan --project "$sample/circuitgame2.toml" \
-            --board "$sample/board.toml" > "$RUNNER_TEMP/pico2.plan"
-          NCG2_RP_PROGRAM="$RUNNER_TEMP/pico2.plan" \
-            cargo build --manifest-path firmware/rp/Cargo.toml --locked --release \
-              --target thumbv8m.main-none-eabihf --features pico2,i2c --bin ncg2-rp
+          build_sample() {
+            local sample="../root/examples/$1"
+            local peripheral="$2"
+            sed 's/^board = "pico2"$/board = "pico"/' "$sample/board.toml" > "$RUNNER_TEMP/board-pico.toml"
+            ../cli/target/debug/ncg2 rp-plan --project "$sample/circuitgame2.toml" \
+              --board "$RUNNER_TEMP/board-pico.toml" > "$RUNNER_TEMP/pico-$peripheral.plan"
+            NCG2_RP_PROGRAM="$RUNNER_TEMP/pico-$peripheral.plan" \
+              cargo build --manifest-path firmware/rp/Cargo.toml --locked --release \
+                --target thumbv6m-none-eabi --features "pico,$peripheral" --bin ncg2-rp
+            ../cli/target/debug/ncg2 rp-plan --project "$sample/circuitgame2.toml" \
+              --board "$sample/board.toml" > "$RUNNER_TEMP/pico2-$peripheral.plan"
+            NCG2_RP_PROGRAM="$RUNNER_TEMP/pico2-$peripheral.plan" \
+              cargo build --manifest-path firmware/rp/Cargo.toml --locked --release \
+                --target thumbv8m.main-none-eabihf --features "pico2,$peripheral" --bin ncg2-rp
+          }
+          build_sample rp-i2c-lm75b i2c
+          build_sample rp-spi-loopback spi
       - name: Check library truth tables with the candidate CLI
         if: runner.os == 'Linux'
         working-directory: lib

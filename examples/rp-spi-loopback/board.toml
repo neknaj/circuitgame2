@@ -1,0 +1,25 @@
+board = "pico2"
+
+[[gpio]]
+direction = "output"
+port = "data1"
+pin = 5
+
+[spi]
+instance = 0
+sck-pin = 18
+mosi-pin = 19
+miso-pin = 16
+cs-pin = 20
+frequency-hz = 1000000
+mode = 3
+bit-order = "msb-first"
+timeout-micros = 20000
+request-ready = "request-ready"
+response-valid = "response-valid"
+response-status = ["status0", "status1", "status2"]
+read-data = ["data0", "data1", "data2", "data3", "data4", "data5", "data6", "data7"]
+request-valid = "one"
+response-ready = "one"
+length = ["one", "zero", "zero", "zero", "zero", "zero", "zero", "zero"]
+write-data = ["zero", "one", "one", "zero", "one", "zero", "zero", "one"]
