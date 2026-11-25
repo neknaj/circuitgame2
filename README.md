@@ -28,6 +28,8 @@ ncg2 eval --func ::gate --input 00 examples/nor.ncg2
 
 ### 順序回路を実行する
 
+CLI に同梱したラッチの例を実行する。 [ラッチの回路記述](examples/selected-latch.ncg2)
+
 ```sh
 ncg2 run --input 0110 --input 1000 examples/selected-latch.ncg2
 ```

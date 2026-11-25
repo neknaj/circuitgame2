@@ -149,14 +149,14 @@ jobs:
 
   vscode:
     needs: [revisions, consumers]
-    uses: neknaj/circuitgame2-editors/.github/workflows/vscode.yml@cbd52eee20db6be325a7087af9dadddb06fd4d8e
+    uses: neknaj/circuitgame2-editors/.github/workflows/vscode.yml@b02837619faa6946d91473392c0e1d483eb6b8e6
     with:
       editors_ref: ${{ needs.revisions.outputs.editors }}
       lsp_artifact: ncg2-candidate-lsp
 
   neovim:
     needs: [revisions, consumers]
-    uses: neknaj/circuitgame2-editors/.github/workflows/neovim.yml@cbd52eee20db6be325a7087af9dadddb06fd4d8e
+    uses: neknaj/circuitgame2-editors/.github/workflows/neovim.yml@b02837619faa6946d91473392c0e1d483eb6b8e6
     with:
       editors_ref: ${{ needs.revisions.outputs.editors }}
       lsp_artifact: ncg2-candidate-lsp

@@ -15,6 +15,15 @@ const ncg2 = join(cli, "target", "debug", process.platform === "win32" ? "ncg2.e
 const component = join(cli, "target", "wasm32-wasip2", "debug", "ncg2.wasm");
 
 
+test("CLI と GUI の同梱例が仕様リポジトリの例と一致する", async () => {
+  const source = fileURLToPath(new URL("../../examples/selected-latch.ncg2", import.meta.url));
+  const paths = [source, join(cli, "examples/selected-latch.ncg2"), join(web, "site/examples/main.ncg2")];
+  const [original, ...copies] = await Promise.all(paths.map(async (path) =>
+    (await readFile(path, "utf8")).replaceAll("\r\n", "\n")));
+  for (const [index, copy] of copies.entries()) {
+    assert.equal(copy, original, paths[index + 1]);
+  }
+});
 function run(file, args, cwd, options = {}) {
   return execFileSync(file, args, { cwd, encoding: "utf8", timeout: 30_000, ...options }).trim();
 }
