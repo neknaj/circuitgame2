@@ -12,7 +12,7 @@
 
 共通の回路編集と実行画面は egui で実装する。ネイティブ版は OS のフォルダー選択を使い、ブラウザー版は利用者が選んだフォルダーからファイルを読む。読み込んだプロジェクトの編集、Core による実行、結果の表示は同じ Rust のコードを使う。
 
-[GUI の CI](https://github.com/neknaj/circuitgame2-gui/actions/workflows/check.yml)では、Windows のワークスペーステストと実行ファイルのビルド、共通 GUI と従来のブラウザー版の WASM ビルドを確認する。リポジトリをまたぐ出力列の比較は、現時点では従来のブラウザー版を対象とする。
+[GUI の CI](https://github.com/neknaj/circuitgame2-gui/actions/workflows/check.yml)では、Windows のワークスペーステストと実行ファイルのビルド、共通 GUI と従来のブラウザー版の WASM ビルドを確認する。統合 CI では、従来のブラウザー版と CLI の出力列を比較する。共通 GUI は Chromium で起動し、フォルダーの選択とエラー後の読み直しを確認する。
 
 ## 言語サービスと LSP
 
