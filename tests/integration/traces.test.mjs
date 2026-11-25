@@ -33,15 +33,21 @@ function coreSource(cwd) {
     // GUI の別ターゲット向け依存も含めて、Core の取り込み方を検査する。
     maxBuffer: 8 * 1024 * 1024,
   }));
-  const core = metadata.packages.filter(({ name }) => name === "circuitgame2-core");
-  assert.equal(core.length, 1);
-  const source = core[0].source;
-  assert.equal(typeof source, "string", "Core の依存先を Git のコミットに固定する。");
-  assert.match(source, /^git\+https:\/\/github\.com\/neknaj\/circuitgame2-core\?rev=([0-9a-f]{40})#\1$/);
+  const names = ["circuitgame2-core", "circuitgame2-syntax", "circuitgame2-project-config"];
+  const sources = names.map((name) => {
+    const packages = metadata.packages.filter((entry) => entry.name === name);
+    assert.equal(packages.length, 1, name);
+    const { source } = packages[0];
+    assert.equal(typeof source, "string", name);
+    assert.match(source, /^git\+https:\/\/github\.com\/neknaj\/circuitgame2-core\?rev=([0-9a-f]{40})#\1$/);
+    return source;
+  });
+  const [core] = sources;
+  assert.ok(sources.every((source) => source === core), "Core・Syntax・ProjectConfig は同じコミットを使う。");
   if (process.env.NCG2_CORE_SHA) {
-    assert.equal(source.split("#")[1], process.env.NCG2_CORE_SHA);
+    assert.equal(core.split("#")[1], process.env.NCG2_CORE_SHA);
   }
-  return source;
+  return core;
 }
 
 function cliTrace(cwd, frames, vram) {
