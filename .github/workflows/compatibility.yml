@@ -157,12 +157,14 @@ jobs:
           cargo --config "$RUNNER_TEMP/core-patch.toml" test --locked --workspace
           cargo --config "$RUNNER_TEMP/core-patch.toml" build --locked --target wasm32-unknown-unknown
           cargo --config "$RUNNER_TEMP/core-patch.toml" build --locked --target wasm32-unknown-unknown -p circuitgame2-gui --lib
-      - name: Share the candidate Windows language server
+      - name: Share the candidate Windows CLI and language server
         if: runner.os == 'Windows'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: ncg2-candidate-lsp
-          path: cli/target/debug/circuitgame2-lsp.exe
+          path: |
+            cli/target/debug/ncg2.exe
+            cli/target/debug/circuitgame2-lsp.exe
           if-no-files-found: error
 
   vscode:
