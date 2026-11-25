@@ -8,7 +8,7 @@
 
 [回路の統合検査](https://github.com/neknaj/circuitgame2/actions/workflows/integration.yml)は、CLI と Web が同じ Core のコミットに依存することを確かめる。CLI に付属する同じ設定と入力で、ネイティブ CLI、Wasmtime、Chromium の出力を比較する。Chromium ではフォルダーを開き、入力スイッチ、tick、リセットを操作する。公開 VRAM の例では、回路の出力と、書き込みを確定した後の記憶内容を照合する。発振器と複数ファイルに分けた SR ラッチでは、組み合わせゲート間の伝搬が tick をまたぐことを出力列で確認する。
 
-[互換検査](https://github.com/neknaj/circuitgame2/actions/workflows/compatibility.yml)は Core または CLI の更新候補を下流の `main` と組み合わせる。Core と CLI のソースや依存関係を変更する PR でも互換検査を実行する。複数のリポジトリを同時に変更した場合は、GitHub Actions の手動実行で各リポジトリの候補の40桁コミット ID を指定する。指定を省略したリポジトリは、実行開始時に解決した `main` のコミットを使う。CLI と GUI の Cargo 解決結果を調べ、候補 Core のパッケージが使われることを確認する。候補の CLI でライブラリの真理値表を検査し、同じ実行でビルドした言語サーバーで VS Code と Neovim の拡張機能を検査する。配布側の依存設定と lockfile の更新はリリース時に行う。
+[互換検査](https://github.com/neknaj/circuitgame2/actions/workflows/compatibility.yml)は Core または CLI の更新候補を下流の `main` と組み合わせる。Core と CLI のソースや依存関係を変更する PR でも互換検査を実行する。複数のリポジトリを同時に変更した場合は、GitHub Actions の手動実行で各リポジトリの候補の40桁コミット ID を指定する。指定を省略したリポジトリは、実行開始時に解決した `main` のコミットを使う。CLI と GUI の Cargo 解決結果を調べ、候補 Core のパッケージが使われることを確認する。候補の CLI で回路ライブラリの真理値表と NCG2M の補助関数の型を検査する。CLI の候補には [NCG2M の check に対応した 16dd062](https://github.com/neknaj/circuitgame2-cli/commit/16dd0628b1a1d22eabd6bd9595d94c2a674fd951) 以降を使う。同じ実行でビルドした言語サーバーで VS Code と Neovim の拡張機能を検査する。配布側の依存設定と lockfile の更新はリリース時に行う。
 
 [ビット選択とラッチの例](https://github.com/neknaj/circuitgame2/blob/main/examples/selected-latch.ncg2)を変更するときは、このリポジトリの原本を編集する。CLI の `examples/selected-latch.ncg2` と GUI の `site/examples/main.ncg2` に同じ内容を取り込むと、両リポジトリから追加の取得なしで例を実行できる。配布側のコミットを統合検査で切り替えるときに原本との一致を調べる。
 
