@@ -1,0 +1,68 @@
+name: Cross-platform circuit traces
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  traces:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      NCG2_CLI_PATH: ${{ github.workspace }}/cli
+      NCG2_WEB_PATH: ${{ github.workspace }}/web
+      NCG2_CORE_SHA: 9736a48f4cc122f0c4f9389bf8c8fb32316fa2ac
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: neknaj/circuitgame2-cli
+          ref: 1d1e1443ce507b6a3220c4dd922d1314d1904fa4
+          path: cli
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: neknaj/circuitgame2-web
+          ref: fd68ed525e394cd304471c1a4bc6f905f53f5c07
+          path: web
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24.14.1
+      - name: Build both CLI targets
+        working-directory: cli
+        run: |
+          rustup target add wasm32-wasip2
+          cargo tree --locked -d
+          cargo build --locked --bin ncg2
+          cargo build --locked --target wasm32-wasip2 --bin ncg2
+      - name: Build the browser simulator
+        working-directory: web
+        run: |
+          rustup target add wasm32-unknown-unknown
+          cargo tree --locked -d
+          cargo install wasm-bindgen-cli --version 0.2.129 --locked
+          cargo build --locked --target wasm32-unknown-unknown
+          wasm-bindgen --target web --out-dir site/pkg target/wasm32-unknown-unknown/debug/circuitgame2_web.wasm
+      - name: Install Wasmtime
+        working-directory: ${{ runner.temp }}
+        run: |
+          archive=wasmtime-v44.0.1-x86_64-linux.tar.xz
+          curl --fail --location --retry 3 --output "$archive" \
+            "https://github.com/bytecodealliance/wasmtime/releases/download/v44.0.1/$archive"
+          echo "afd58715f105e3a7f454169daed22168c5736ec5f225fb04c4ac62c54c9508a3  $archive" | sha256sum --check
+          tar xJf "$archive"
+          echo "$RUNNER_TEMP/${archive%.tar.xz}" >> "$GITHUB_PATH"
+      - name: Compare traces
+        working-directory: tests/integration
+        run: |
+          npm ci --ignore-scripts
+          npm exec -- playwright install --with-deps chromium
+          npm test
