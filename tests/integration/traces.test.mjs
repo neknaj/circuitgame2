@@ -39,6 +39,10 @@ function cliTrace(cwd, frames, vram) {
   const args = ["run", "--project", "circuitgame2.toml"];
   if (vram) args.push("--vram", vram);
   for (const frame of frames) args.push("--input", frame);
+  return compareCliTraces(cwd, args);
+}
+
+function compareCliTraces(cwd, args) {
   const native = run(ncg2, args, cwd).split(/\r?\n/);
   const wasi = run("wasmtime", ["run", "--dir=.", component, ...args], cwd).split(/\r?\n/);
   assert.deepEqual(wasi, native);
@@ -113,6 +117,16 @@ function serveSite() {
     }
   });
 }
+
+test("自律 UART の全波形がネイティブと WASI で一致する", () => {
+  const folder = fileURLToPath(new URL("../../examples/clocked-uart-transmitter/", import.meta.url));
+  const ticks = run("python", ["-B", "-c", "from demo import RUN_TICKS; print(RUN_TICKS)"], folder);
+  const trace = compareCliTraces(folder, ["run", "--project", "circuitgame2.toml", "--ticks", ticks]);
+  const message = run("python", [
+    "-B", "-c", "import sys; from demo import parse_trace, receive; print(receive(parse_trace(sys.stdin.read())))",
+  ], folder, { input: trace.join("\n") });
+  assert.equal(message, "Hello, world!");
+});
 
 test("共有プロジェクトの実行とブラウザーでの読み込みを確認する", async (t) => {
   assert.equal(coreSource(web), coreSource(cli));

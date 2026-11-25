@@ -16,7 +16,7 @@ jobs:
     env:
       NCG2_CLI_PATH: ${{ github.workspace }}/cli
       NCG2_WEB_PATH: ${{ github.workspace }}/web
-      NCG2_CORE_SHA: 9736a48f4cc122f0c4f9389bf8c8fb32316fa2ac
+      NCG2_CORE_SHA: 7738f9fdf74314d77a3871cbd7806e1859add342
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -24,14 +24,20 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: neknaj/circuitgame2-cli
-          ref: 1d1e1443ce507b6a3220c4dd922d1314d1904fa4
+          ref: 7ad33ac1b316b9d375e5e200b8b0a3100813c1a4
           path: cli
           persist-credentials: false
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: neknaj/circuitgame2-gui
-          ref: 6a898974a8d8face156e455db4bfe8f09bf5736c
+          ref: 00d84fbcbe15a9b9592f5e9395b299175c9d13af
           path: web
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: neknaj/circuitgame2-lib
+          ref: 8d31e170f301a2e8900066eaea3dbf23643c8878
+          path: examples/clocked-uart-transmitter/vendor/circuitgame2-lib
           persist-credentials: false
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
