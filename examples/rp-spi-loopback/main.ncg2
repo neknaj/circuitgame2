@@ -1,0 +1,8 @@
+(using nor)
+
+(module main
+  (in request-ready response-valid status0 status1 status2
+      data0 data1 data2 data3 data4 data5 data6 data7)
+  (out one zero data1)
+  (def one (nor 0 0))
+  (def zero (nor 1 1)))
