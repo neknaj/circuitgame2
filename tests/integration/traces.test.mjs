@@ -15,6 +15,15 @@ const ncg2 = join(cli, "target", "debug", process.platform === "win32" ? "ncg2.e
 const component = join(cli, "target", "wasm32-wasip2", "debug", "ncg2.wasm");
 
 
+test("CLI と GUI の同梱例が仕様リポジトリの例と一致する", async () => {
+  const source = fileURLToPath(new URL("../../examples/selected-latch.ncg2", import.meta.url));
+  const paths = [source, join(cli, "examples/selected-latch.ncg2"), join(web, "site/examples/main.ncg2")];
+  const [original, ...copies] = await Promise.all(paths.map(async (path) =>
+    (await readFile(path, "utf8")).replaceAll("\r\n", "\n")));
+  for (const [index, copy] of copies.entries()) {
+    assert.equal(copy, original, paths[index + 1]);
+  }
+});
 function run(file, args, cwd, options = {}) {
   return execFileSync(file, args, { cwd, encoding: "utf8", timeout: 30_000, ...options }).trim();
 }
@@ -39,6 +48,10 @@ function cliTrace(cwd, frames, vram) {
   const args = ["run", "--project", "circuitgame2.toml"];
   if (vram) args.push("--vram", vram);
   for (const frame of frames) args.push("--input", frame);
+  return compareCliTraces(cwd, args);
+}
+
+function compareCliTraces(cwd, args) {
   const native = run(ncg2, args, cwd).split(/\r?\n/);
   const wasi = run("wasmtime", ["run", "--dir=.", component, ...args], cwd).split(/\r?\n/);
   assert.deepEqual(wasi, native);
@@ -113,6 +126,16 @@ function serveSite() {
     }
   });
 }
+
+test("自律 UART の全波形がネイティブと WASI で一致する", () => {
+  const folder = fileURLToPath(new URL("../../examples/clocked-uart-transmitter/", import.meta.url));
+  const ticks = run("python", ["-B", "-c", "from demo import RUN_TICKS; print(RUN_TICKS)"], folder);
+  const trace = compareCliTraces(folder, ["run", "--project", "circuitgame2.toml", "--ticks", ticks]);
+  const message = run("python", [
+    "-B", "-c", "import sys; from demo import parse_trace, receive; print(receive(parse_trace(sys.stdin.read())))",
+  ], folder, { input: trace.join("\n") });
+  assert.equal(message, "Hello, world!");
+});
 
 test("共有プロジェクトの実行とブラウザーでの読み込みを確認する", async (t) => {
   assert.equal(coreSource(web), coreSource(cli));

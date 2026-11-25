@@ -4,9 +4,13 @@
 
 配布時は Cargo の git 依存を使用する。core を参照する下流は同一 URL と同一の40桁コミット ID を `rev` に使い、対応する `version` も記す。Cargo は取得先のコミットを `rev` で選び、そのコミットのパッケージが `version` の要件を満たすか検査する。各配布側の `Cargo.lock` をコミットし、CI は `--locked`、`cargo tree -d`、lockfile の core の取得元とコミット ID、およびメインで指定したコミットの一致を確認する。
 
-リリースでは core にタグを付けてコミット ID を確定し、GUI と CLI の依存宣言と lockfile を更新する。統合 CI は core、GUI、CLI、editors のコミット ID と、editors が使う CLI の LSP サーバーのバージョンを固定して検査する。ローカル開発では checkout を並べ、Cargo の実行ルートに適用される外部設定で `[patch."https://github.com/neknaj/circuitgame2-core"]` に path を指定する。patch 先も `version` 要件を満たす必要がある。ローカル設定と patch に伴う一時的な lockfile の差分は配布から除外する。公開 registry への移行は各クレートを公開できる状態になった時点で判断する。
+リリースでは core にタグを付けてコミット ID を確定し、GUI と CLI の依存宣言と lockfile を更新する。配布の統合検査では CLI、GUI、lib のコミット ID を固定する。editors の配布検査では VS Code と Neovim が同じ固定版の LSP サーバーを使う。ローカル開発では checkout を並べ、Cargo の実行ルートに適用される外部設定で `[patch."https://github.com/neknaj/circuitgame2-core"]` に path を指定する。patch 先も `version` 要件を満たす必要がある。ローカル設定と patch に伴う一時的な lockfile の差分は配布から除外する。公開 registry への移行は各クレートを公開できる状態になった時点で判断する。
 
 [回路の統合検査](https://github.com/neknaj/circuitgame2/actions/workflows/integration.yml)は、CLI と Web が同じ Core のコミットに依存することを確かめる。CLI に付属する同じ設定と入力で、ネイティブ CLI、Wasmtime、Chromium の出力を比較する。Chromium ではフォルダーを開き、入力スイッチ、tick、リセットを操作する。公開 VRAM の例では、回路の出力と、書き込みを確定した後の記憶内容を照合する。発振器と複数ファイルに分けた SR ラッチでは、組み合わせゲート間の伝搬が tick をまたぐことを出力列で確認する。
+
+[互換検査](https://github.com/neknaj/circuitgame2/actions/workflows/compatibility.yml)は Core または CLI の更新候補を下流の `main` と組み合わせる。GitHub Actions の手動実行では候補の40桁コミット ID を指定する。指定を省略したリポジトリは、実行開始時に解決した `main` のコミットを使う。CLI と GUI の Cargo 解決結果を調べ、候補 Core のパッケージが使われることを確認する。候補の CLI でライブラリの真理値表を検査し、同じ実行でビルドした言語サーバーで VS Code と Neovim の拡張機能を検査する。配布側の依存設定と lockfile の更新はリリース時に行う。
+
+[ビット選択とラッチの例](https://github.com/neknaj/circuitgame2/blob/main/examples/selected-latch.ncg2)を変更するときは、このリポジトリの原本を編集する。CLI の `examples/selected-latch.ncg2` と GUI の `site/examples/main.ncg2` に同じ内容を取り込むと、両リポジトリから追加の取得なしで例を実行できる。配布側のコミットを統合検査で切り替えるときに原本との一致を調べる。
 
 ## ネイティブとブラウザーの GUI
 
