@@ -54,18 +54,15 @@ Verus で表現できる core の仕様適合や実装間の一致は、公開�
 
 証明すべき事実を `assume` で置いたり、検証対象の本体を属性で検査から外したりしてはならない。外部コードとの境界に仮定が必要な場合は、対象と適用範囲、仮定する契約、その理由、依存する公開定理を記録する。`vstd` が外部に与える仕様に依存する場合も、変更のレビューで必要な契約を確かめる。
 
-CI で Rust ソースを `git grep` などで検索し、次の構文の追加を検出する。レビューでは実際の構文と適用先を確認し、禁止された用途や記録のない仮定を修正する。検索結果にはコメントや文字列も含まれ得るため、該当箇所を確認する。
+全体 CI は固定版 Verus の `--no-cheating` をワークスペースの検証対象に適用する。追跡済みの Rust ソースは、Verus が機械的に拒否する構文と、追加の確認が必要な検査除外がないかも調べる。コメントや文字列は検索対象から除く。
 
-- `assume`。証明すべき事実を仮定する文。
-- `#[verifier::external_body]` と `#[verifier::external_fn_specification]`。検証しない本体や、検証外の実装について仮定した契約。
+- `assume`、`admit`、`axiom fn`。証明すべき事実を仮定する構文。
+- `assume_specification`、`#[verifier::external_body]`、`#[verifier::external_fn_specification]`。検証しない本体や、検証外の実装について仮定した契約。
 - `#[verifier::external]`。検証対象から外す宣言や実装。関数の場合は `external_body` などを経由する間接依存を確認する。トレイト実装の場合は、型検査を通じて検証結果へ影響し得る点も確認する。
-- `verifier::exec_allows_no_decreases_clause`。関数、モジュール、クレートに適用できる、実行コードの減少量検査を外す属性。検査を外すときは、理由と停止性を前提とする範囲を記録する。
+- `assume_termination`、`exec_allows_no_decreases_clause`、`externals_available_without_declaration`。停止性や外部呼び出しの検査を緩める属性。
+- `#[verus::trusted]` とその派生形。信頼する箇所や契約を指定する属性。
 
-追跡済みの Rust ソースを検索する例を示す。
-
-```sh
-git grep -n -w -E 'assume|external_body|external_fn_specification|external|exec_allows_no_decreases_clause' -- '*.rs'
-```
+検証対象のコードに例外が必要なら、適用箇所と対象を絞り、依存する保証と理由を先にレビューする。例外は監査で検出できる形に残す。
 
 レビューでは仕様、実行コード、証明、仮定を照合する。正常例と異常例で仕様自体の妥当性を確認する。固定したツールチェーンで `cargo verus verify --locked` と対象の Cargo テスト・ビルドを実行し、どの契約が証明され、どの動作をテストで確認したかを報告する。
 
