@@ -14,6 +14,7 @@
 # 実行と外部 I/O
 
 - [シミュレーション](simulation.md)
+  - [実行スナップショット](runtime-snapshot.md)
   - [GPU と RP マイコンの実行バックエンド](backends.md)
 - [プロジェクトの実行設定](project-config.md)
 - [外部 I/O とメモリ](memory-io.md)
