@@ -21,6 +21,16 @@
 
 Web 版は IndexedDB に本体と一覧表示に必要な情報を同じトランザクションで保存する。コミット後に保存完了を表示する。容量不足や利用できないストレージは診断し、ファイルのエクスポートとインポートも提供する。
 
+## CLI と GUI での保存と再開
+
+ネイティブの CLI では `ncg2 run --save-at <tick> <ファイル>` で保存する。続けて実行するときは、保存時と同じ回路と設定を使い、`--restore <ファイル>` と再開後の入力を渡す。復元直後の出力は保存した tick の出力で、その次の tick から新しい入力が適用される。[CLI の実行例](https://github.com/neknaj/circuitgame2-cli#実行を保存して再開する)
+
+デスクトップ GUI では「Save snapshot…」でファイルに保存する。「Restore snapshot…」で同じ回路を読み込んだ状態に復元できる。復元直後は一時停止し、波形の記録を保存 tick から始める。入力スイッチを切り替えた直後に保存した場合も、保存されるのは最後に回路に適用した入力である。[GUI の説明](https://github.com/neknaj/circuitgame2-gui#スナップショットから再開する)
+
+Web GUI では「Save in browser」で保存し、ページを開き直した後も「Saved snapshots」から選べる。「Restore selected snapshot」で再開する。別の端末や CLI へ渡すには「Download snapshot」でファイルを作る。ファイルの読み込みには「Restore snapshot」を使う。[Web GUI](https://neknaj.github.io/circuitgame2-gui/)
+
+現行の保存と再開は外付けデバイスを使わない順序回路を対象とする。ファイルは保存した回路と配線、端子配置、tick 周期が一致する実行先で使う。
+
 ## 証明と結合テスト
 
 Core で次の性質を証明する。
